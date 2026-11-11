@@ -1,0 +1,158 @@
+/root/.gradle/caches/9.8.2/transforms/fc5921d5bbaaed3dec339b81a9948b66/transformed/lifecycle-runtime-release/jars/lint.jar: Warning: Library lint checks reference invalid APIs; these checks will be skipped!
+
+Lint found an issue registry (androidx.lifecycle.lint.LifecycleRuntimeIssueRegistry)
+which contains some references to invalid API:
+org.jetbrains.kotlin.asJava.elements.KtLightModifierList#getKotlinOrigin(): org.jetbrains.kotlin.psi.KtModifierList
+(Referenced from androidx/lifecycle/lint/LifecycleWhenChecksKt.class)
+
+Therefore, this lint check library is not included
+in analysis. This affects the following lint checks:
+UnsafeLifecycleWhenUsage,RepeatOnLifecycleWrongUsage
+
+To use this lint check, upgrade to a more recent version
+of the library. [ObsoleteLintCustomCheck]
+
+   Explanation for issues of type "ObsoleteLintCustomCheck":
+   Lint can be extended with "custom checks": additional checks implemented by
+   developers and libraries to for example enforce specific API usages
+   required by a library or a company coding style guideline.
+
+   The Lint APIs are not yet stable, so these checks may either cause a
+   performance degradation, or stop working, or provide wrong results.
+
+   This warning flags custom lint checks that are found to be using obsolete
+   APIs and will need to be updated to run in the current lint environment.
+
+   It may also flag issues found to be using a newer version of the API,
+   meaning that you need to use a newer version of lint (or Android Studio or
+   Gradle plugin etc) to work with these checks.
+
+/home/user/rocket-time-bank/app/src/main/java/com/cmdalton/rocket/RocketRepo.kt:59: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+            prefs?.edit()?.putString(KEY_STATE, StateJson.encode(after))?.commit()
+                                                                          ~~~~~~~~
+/home/user/rocket-time-bank/app/src/main/java/com/cmdalton/rocket/RocketRepo.kt:70: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+        prefs?.edit()?.putString(KEY_PIN_SALT, salt)?.putString(KEY_PIN_HASH, Pin.hash(pin, salt))?.commit()
+                                                                                                    ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+/home/user/rocket-time-bank/app/src/main/res/xml/rocket_widget_info.xml:10: Warning: Attribute previewLayout is only used in API level 31 and higher (current min is 26) [UnusedAttribute]
+    android:previewLayout="@layout/widget_rocket"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/rocket-time-bank/app/src/main/res/xml/rocket_widget_info.xml:12: Warning: Attribute targetCellWidth is only used in API level 31 and higher (current min is 26) [UnusedAttribute]
+    android:targetCellWidth="2"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/rocket-time-bank/app/src/main/res/xml/rocket_widget_info.xml:13: Warning: Attribute targetCellHeight is only used in API level 31 and higher (current min is 26) [UnusedAttribute]
+    android:targetCellHeight="2"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedAttribute":
+   This check finds attributes set in XML files that were introduced in a
+   version newer than the oldest version targeted by your application (with
+   the minSdkVersion attribute).
+
+   This is not an error; the application will simply ignore the attribute.
+   However, if the attribute is important to the appearance or functionality
+   of your application, you should consider finding an alternative way to
+   achieve the same result with only available attributes, and then you can
+   optionally create a copy of the layout in a layout-vNN folder which will be
+   used on API NN or higher where you can take advantage of the newer
+   attribute.
+
+   Note: This check does not only apply to attributes. For example, some tags
+   can be unused too, such as the new <tag> element in layouts introduced in
+   API 21.
+
+/home/user/rocket-time-bank/app/build.gradle.kts:73: Warning: A newer version of org.json:json than 20250517 is available: 20260814 [NewerVersionAvailable]
+    testImplementation("org.json:json:20250517")
+                       ~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+/home/user/rocket-time-bank/app/src/main/res/mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/home/user/rocket-time-bank/app/src/main/java/com/cmdalton/rocket/ui/MainActivity.kt:103: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val pkg = Uri.parse("package:$packageName")
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/rocket-time-bank/app/src/main/java/com/cmdalton/rocket/RocketRepo.kt:59: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            prefs?.edit()?.putString(KEY_STATE, StateJson.encode(after))?.commit()
+            ~~~~~~~~~~~~~
+/home/user/rocket-time-bank/app/src/main/java/com/cmdalton/rocket/RocketRepo.kt:70: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs?.edit()?.putString(KEY_PIN_SALT, salt)?.putString(KEY_PIN_HASH, Pin.hash(pin, salt))?.commit()
+        ~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 11 warnings

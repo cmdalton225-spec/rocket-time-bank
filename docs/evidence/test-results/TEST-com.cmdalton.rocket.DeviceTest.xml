@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.cmdalton.rocket.DeviceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:28:07.512Z" hostname="vm" time="7.421">
+  <properties/>
+  <testcase name="pinIsSavedHashedAndChecked" classname="com.cmdalton.rocket.DeviceTest" time="3.468"/>
+  <testcase name="serviceLandsTheRocketAndOpensTheLandingScreen" classname="com.cmdalton.rocket.DeviceTest" time="0.17"/>
+  <testcase name="missingClockAppIsHandledGracefully" classname="com.cmdalton.rocket.DeviceTest" time="0.036"/>
+  <testcase name="screenOffPausesAndUnlockResumesWithAFreshClockTimer" classname="com.cmdalton.rocket.DeviceTest" time="0.064"/>
+  <testcase name="clockTimerIntentCarriesTheExactTimeAndSkipsUi" classname="com.cmdalton.rocket.DeviceTest" time="0.024"/>
+  <testcase name="noInternetPermission" classname="com.cmdalton.rocket.DeviceTest" time="0.044"/>
+  <testcase name="widgetShowsTheSameBank" classname="com.cmdalton.rocket.DeviceTest" time="0.517"/>
+  <testcase name="fullLoopThroughTheScreens" classname="com.cmdalton.rocket.DeviceTest" time="2.145"/>
+  <testcase name="landingActivityShowsAndReturnsToTheRocket" classname="com.cmdalton.rocket.DeviceTest" time="0.09"/>
+  <testcase name="bankSurvivesARestart" classname="com.cmdalton.rocket.DeviceTest" time="0.027"/>
+  <testcase name="clearMidFlightAsksFirstThenRefunds" classname="com.cmdalton.rocket.DeviceTest" time="0.327"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Intent = Intent { act=android.intent.action.SCREEN_OFF }; Matching wrappers: [Wrapper[receiver=[com.cmdalton.rocket.FlightService$screenReceiver$1@5c586f94], context=[android.app.ContextImpl@231f61d9], intentFilter=[android.content.IntentFilter@77b39368]]]
+Intent = Intent { act=android.intent.action.USER_PRESENT }; Matching wrappers: [Wrapper[receiver=[com.cmdalton.rocket.FlightService$screenReceiver$1@5c586f94], context=[android.app.ContextImpl@231f61d9], intentFilter=[android.content.IntentFilter@77b39368]]]
+]]></system-err>
+</testsuite>

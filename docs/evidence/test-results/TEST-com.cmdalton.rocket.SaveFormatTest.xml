@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.cmdalton.rocket.SaveFormatTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:28:14.935Z" hostname="vm" time="0.019">
+  <properties/>
+  <testcase name="everyStateRoundTrips" classname="com.cmdalton.rocket.SaveFormatTest" time="0.008"/>
+  <testcase name="unknownHistoryLinesAreSkippedNotFatal" classname="com.cmdalton.rocket.SaveFormatTest" time="0.0"/>
+  <testcase name="pinMustBeFourDigits" classname="com.cmdalton.rocket.SaveFormatTest" time="0.001"/>
+  <testcase name="historyIsCapped" classname="com.cmdalton.rocket.SaveFormatTest" time="0.007"/>
+  <testcase name="negativeBalanceIsNeverLoaded" classname="com.cmdalton.rocket.SaveFormatTest" time="0.001"/>
+  <testcase name="pinIsCheckedAgainstASaltedHash" classname="com.cmdalton.rocket.SaveFormatTest" time="0.001"/>
+  <testcase name="emptyOrBrokenSaveStartsFresh" classname="com.cmdalton.rocket.SaveFormatTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

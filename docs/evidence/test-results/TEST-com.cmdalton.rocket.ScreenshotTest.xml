@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.cmdalton.rocket.ScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:28:14.959Z" hostname="vm" time="5.964">
+  <properties/>
+  <testcase name="grownUpSide" classname="com.cmdalton.rocket.ScreenshotTest" time="4.571"/>
+  <testcase name="flying" classname="com.cmdalton.rocket.ScreenshotTest" time="0.217"/>
+  <testcase name="landed" classname="com.cmdalton.rocket.ScreenshotTest" time="0.187"/>
+  <testcase name="pick" classname="com.cmdalton.rocket.ScreenshotTest" time="0.186"/>
+  <testcase name="pausedScreenOff" classname="com.cmdalton.rocket.ScreenshotTest" time="0.178"/>
+  <testcase name="empty" classname="com.cmdalton.rocket.ScreenshotTest" time="0.186"/>
+  <testcase name="ready" classname="com.cmdalton.rocket.ScreenshotTest" time="0.194"/>
+  <testcase name="waiting" classname="com.cmdalton.rocket.ScreenshotTest" time="0.169"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.cmdalton.rocket.BankTest" tests="30" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:28:07.344Z" hostname="vm" time="0.037">
+  <properties/>
+  <testcase name="tickRecordsAHeartbeatWhileFlying" classname="com.cmdalton.rocket.BankTest" time="0.021"/>
+  <testcase name="playStartsTheCountdown" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="approveWithNothingPendingDoesNothing" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="requestNeedsEnoughInTheBank" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="countdownFormat" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="clearBeforeLaunchRefundsEverything" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="addTimeBanksMinutesAndLogsIt" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="recoverStopsTimeAtTheLastHeartbeat" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="pauseFreezesTheCountdownAndPlayResumesIt" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="screenOffPausesAndUnlockResumes" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="playTwiceDoesNotRestart" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="clearCancelsAPendingRequest" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="unlockDoesNotResumeAManualPause" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="presetsAreMattsChoice" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="flightRemainingNeverNegative" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="recoverLandsAFlightThatHadAlreadyRunOut" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="clearMidFlightRefundsTheUnusedTime" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="denyLeavesTheBankAlone" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="recoverLeavesAFreshFlightAlone" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="tickLandsTheRocketAtZero" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="approvedFlightDoesNotCountDownUntilPlay" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="approveMovesMinutesFromBankIntoAWaitingFlight" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="tickDoesNothingWhilePaused" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="fullLoopEarnRequestApprovePlayPauseLand" classname="com.cmdalton.rocket.BankTest" time="0.001"/>
+  <testcase name="onlyOneRequestAtATimeAndNotDuringAFlight" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="clearWhilePausedRefundsTheFrozenTime" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="clearWithNothingGoingOnDoesNothing" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="clockTimerMustBeRestartedAfterEveryPause" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="minutesLeftRoundsUp" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <testcase name="addTimeIgnoresZeroAndNegative" classname="com.cmdalton.rocket.BankTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
