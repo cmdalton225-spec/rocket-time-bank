@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- All the words in one place, so Matt can change any of them. -->
+    <string name="app_name">Rocket Time Bank</string>
+
+    <!-- Kid side -->
+    <string name="bank_label">Rocket bank</string>
+    <string name="minutes">%1$d min</string>
+    <string name="pick_prompt">How much time?</string>
+    <string name="ask_button">Ask for %1$d min</string>
+    <string name="clear">Clear</string>
+    <string name="asked">You asked for %1$d min</string>
+    <string name="waiting">Waiting for a grown-up to say OK</string>
+    <string name="ready">%1$d min ready!</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="paused">Paused</string>
+    <string name="paused_screen_off">Paused while the screen was off</string>
+    <string name="bank_empty">The bank is empty</string>
+    <string name="grownups">Grown-ups</string>
+    <string name="clear_confirm_title">Land the rocket now?</string>
+    <string name="clear_confirm_body">Unused minutes go back to the bank.</string>
+    <string name="land_now">Land now</string>
+    <string name="keep_flying">Keep flying</string>
+    <string name="clock_failed">The Clock timer didn\'t start, but the rocket timer is running.</string>
+    <string name="landed_title">The rocket has landed</string>
+    <string name="ok">OK</string>
+
+    <!-- Grown-up side -->
+    <string name="pin_set_title">Set a grown-up PIN</string>
+    <string name="pin_confirm_title">Type the PIN again</string>
+    <string name="pin_mismatch">The PINs didn\'t match. Try again.</string>
+    <string name="pin_enter_title">Grown-up PIN</string>
+    <string name="pin_wrong">Wrong PIN</string>
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
+    <string name="parent_title">Grown-ups</string>
+    <string name="balance_line">In the bank: %1$s</string>
+    <string name="request_line">Asher asked for %1$d min</string>
+    <string name="approve">Approve</string>
+    <string name="deny">Deny</string>
+    <string name="not_enough">Not enough in the bank for this request.</string>
+    <string name="no_request">No requests right now.</string>
+    <string name="flight_line_ready">Approved %1$d min. Waiting for Asher to press Play.</string>
+    <string name="flight_line_flying">Flying: %1$s left</string>
+    <string name="flight_line_paused">Paused: %1$s left</string>
+    <string name="add_time">Add earned time</string>
+    <string name="add_amount">+%1$d min</string>
+    <string name="history">History</string>
+    <string name="history_empty">Nothing yet.</string>
+    <string name="setup">Tablet setup</string>
+    <string name="setup_notifications">Notifications (rocket countdown in the bar)</string>
+    <string name="setup_overlay">Appear on top (landing screen over other apps, Clock timer after unlock)</string>
+    <string name="setup_fullscreen">Full-screen alerts (landing screen when locked)</string>
+    <string name="setup_on">On</string>
+    <string name="setup_turn_on">Turn on</string>
+    <string name="done">Done</string>
+    <string name="hist_added">Added %1$s</string>
+    <string name="hist_requested">Asked for %1$s</string>
+    <string name="hist_cancelled">Cleared request for %1$s</string>
+    <string name="hist_approved">Approved %1$s</string>
+    <string name="hist_denied">Denied %1$s</string>
+    <string name="hist_launched">Launched %1$s</string>
+    <string name="hist_landed">Landed after %1$s</string>
+    <string name="hist_cleared">Landed early, %1$s back in the bank</string>
+
+    <!-- System places -->
+    <string name="note_flying">Rocket is flying</string>
+    <string name="note_paused">Paused, %1$d min left</string>
+    <string name="channel_flight">Rocket flight</string>
+    <string name="channel_landing">Rocket landing</string>
+    <string name="widget_description">Rocket and banked minutes</string>
+    <string name="widget_minutes_placeholder">0 min</string>
+    <string name="widget_label_placeholder">in the bank</string>
+</resources>
