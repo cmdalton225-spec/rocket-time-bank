@@ -1,0 +1,36 @@
+ASHER'S TIME BANK — V17 FLIGHT RESUME FIX
+========================================
+
+This is the same Firebase-connected app and the same project as the final
+cockpit version. No new project, no new device links, no bank reset.
+
+WHAT CHANGED
+- Prevents the animation from overwriting the saved rocket position while
+  Firebase is still connecting (especially important on Fire/Silk).
+- Saves rocket position when the page is hidden or closed, plus periodic saves.
+- Reopening the site resumes an unfinished journey from its last saved place.
+- If the browser has discarded its saved animation data, the rocket uses the
+  CURRENT bank balance to determine its position instead of replaying Earth.
+- An unfinished zero-bank return continues toward Earth after reopening.
+- Added a cache-busting version to the child page so Silk gets the new code.
+
+UNCHANGED
+- Firebase project asher-s-time-bank and existing login / device links
+- Saved banked minutes, request approvals, spending, Dad Control and PIN
+- Cockpit design, planet thresholds, rocket artwork, sounds, and Firestore rules
+
+PUBLISHING UPDATE (FROM THE PROJECT FOLDER)
+1. Keep the previous project folder as a backup.
+2. Open this extracted Asher_Time_Bank_Final folder in VS Code.
+3. In the VS Code terminal, run: firebase.cmd use
+   Confirm it shows * default (asher-s-time-bank).
+4. Run: firebase.cmd deploy --only hosting
+5. Reopen https://asher-s-time-bank.web.app on the Fire tablet.
+   If Silk still shows old behavior, refresh the page once.
+
+Hosting-only deployment does not change Firestore data or security rules.
+
+TEST STATUS
+JavaScript syntax and a simulated delayed Firebase connection, reload,
+mid-flight resume, zero-bank return, and missing local-storage fallback were
+checked. The live Firebase account and Amazon Silk have not been tested here.

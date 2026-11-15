@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only the Firebase email/password account belonging to Dad.
+    function isParent() {
+      return request.auth != null
+        && request.auth.uid == "CQHfaOT4BNbXBdbYDt39OB6ILTH3";
+    }
+
+    // A child device becomes trusted only after Dad explicitly links its UID.
+    function isChild() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == "anonymous"
+        && exists(/databases/$(database)/documents/approvedChildren/$(request.auth.uid));
+    }
+
+    match /approvedChildren/{uid} {
+      allow get: if isParent() || (request.auth != null && request.auth.uid == uid);
+      allow list, create, update, delete: if isParent();
+    }
+
+    match /timeBank/{bankId} {
+      allow read: if isParent() || (isChild() && bankId == "main");
+      allow create, delete: if isParent();
+      allow update: if isParent() ||
+        (isChild() && bankId == "main" && validChildSessionUpdate());
+
+      function validChildSessionUpdate() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "bankSeconds", "sessionSeconds", "running", "sessionStatus",
+            "lastChargedAt", "updatedAt"
+          ])
+          && request.resource.data.bankSeconds is int
+          && request.resource.data.sessionSeconds is int
+          && request.resource.data.bankSeconds >= 0
+          && request.resource.data.sessionSeconds >= 0
+          && request.resource.data.bankSeconds <= resource.data.bankSeconds
+          && request.resource.data.sessionSeconds <= resource.data.sessionSeconds
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.lastChargedAt == request.time
+          && (validStart() || validChargeOrPause() || validEnd());
+      }
+
+      function validStart() {
+        return resource.data.running == false
+          && resource.data.sessionStatus in ["approved", "paused"]
+          && resource.data.bankSeconds > 0
+          && resource.data.sessionSeconds > 0
+          && request.resource.data.running == true
+          && request.resource.data.sessionStatus == "running"
+          && request.resource.data.bankSeconds == resource.data.bankSeconds
+          && request.resource.data.sessionSeconds == resource.data.sessionSeconds;
+      }
+
+      function validChargeOrPause() {
+        return resource.data.running == true
+          && resource.data.sessionStatus == "running"
+          && (resource.data.bankSeconds - request.resource.data.bankSeconds)
+             == (resource.data.sessionSeconds - request.resource.data.sessionSeconds)
+          && (
+            (request.resource.data.running == true
+              && request.resource.data.sessionStatus == "running"
+              && request.resource.data.bankSeconds > 0
+              && request.resource.data.sessionSeconds > 0)
+            || (request.resource.data.running == false
+              && request.resource.data.sessionStatus in ["paused", "idle"])
+          );
+      }
+
+      function validEnd() {
+        return request.resource.data.running == false
+          && request.resource.data.sessionStatus == "idle"
+          && request.resource.data.sessionSeconds == 0
+          && (
+            (resource.data.running == true
+              && resource.data.sessionStatus == "running")
+            || (resource.data.running == false
+              && resource.data.sessionStatus in ["approved", "paused"]
+              && request.resource.data.bankSeconds == resource.data.bankSeconds)
+          );
+      }
+    }
+
+    match /requests/{requestId} {
+      allow get: if isParent() ||
+        (isChild() && resource.data.childUid == request.auth.uid);
+      allow list: if isParent();
+      allow create: if isChild()
+        && request.resource.data.childUid == request.auth.uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.type in [
+          "bank_change", "session_change", "start_session", "reset_session"
+        ]
+        && request.resource.data.minutes is int
+        && request.resource.data.minutes >= -240
+        && request.resource.data.minutes <= 240
+        && (
+          (request.resource.data.type in ["bank_change", "session_change"]
+            && request.resource.data.minutes != 0
+            && request.resource.data.minutes % 5 == 0)
+          || (request.resource.data.type in ["start_session", "reset_session"]
+            && request.resource.data.minutes == 0)
+        )
+        && request.resource.data.keys().hasOnly([
+          "childUid", "type", "minutes", "status", "createdAt"
+        ])
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isParent();
+    }
+
+    match /history/{historyId} {
+      allow read, write: if isParent();
+    }
+  }
+}
