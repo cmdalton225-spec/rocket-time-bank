@@ -1,0 +1,20 @@
+/* Nov 11 tablet additions on top of v17 cockpit — kid tap targets ~72dp (spec). */
+body[data-role="child"] .session-actions button {
+  min-height: 72px;
+  min-width: 72px;
+  padding: 14px 22px;
+  font-size: clamp(16px, 2.2vw, 22px);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+body[data-role="child"] .action-key {
+  min-height: 72px;
+}
+body[data-role="child"] .keypad button {
+  min-height: 72px;
+  font-size: clamp(18px, 2.5vw, 26px);
+}
+body[data-role="child"] .cockpit-footer .session-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}

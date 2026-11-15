@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Dad Control | Mission HQ</title><link rel="stylesheet" href="styles.css"></head>
+<body data-role="dad"><div class="sitebar"><span class="connection-tag"><i></i> FIREBASE CONNECTED</span><nav><a href="index.html">↖ ASHER'S COCKPIT</a><a class="active" href="dad.html">DAD CONTROL</a></nav></div>
+<main class="station">
+<section class="cockpit metal" aria-label="Dad Control command console"><div class="bolt top-left"></div><div class="bolt top-right"></div><div class="bolt bottom-left"></div><div class="bolt bottom-right"></div>
+<div class="console-title"><span class="stencil">✦ DAD CONTROL</span><span class="serial">MISSION HQ / AUTHORIZED PERSONNEL</span></div>
+<div class="console-grid dad-grid">
+ <section class="instrument-left">
+  <div class="clock-unit inset"><div class="clock-face"><span class="digits" id="bank-clock">01:25:00</span></div><div class="instrument-label">TOTAL BANKED</div><div class="clock-face small"><span class="digits" id="session-clock">00:00</span></div><div class="instrument-label">CURRENT SESSION</div></div>
+  <div class="request-panel inset" id="request-panel"><div class="panel-heading">INCOMING TRANSMISSION</div><div class="request-body" id="request-body">NO PENDING REQUESTS</div><div class="approval-actions"><button id="approve-request" class="approve" disabled>✓ APPROVE</button><button id="deny-request" class="deny" disabled>✕ DENY</button></div></div>
+ </section>
+ <section class="center-console"><div class="lights-row"><div class="indicator"><span class="lamp green lit" id="lamp-ready"></span><span>LINKED</span></div><div class="indicator"><span class="lamp amber" id="lamp-pending"></span><span>REQUEST</span></div><div class="indicator"><span class="lamp red" id="lamp-playing"></span><span>PLAYING</span></div></div>
+  <div class="entry-display inset"><span class="entry-prefix">MIN</span><span class="digits" id="entered-minutes">005</span></div>
+  <div class="input-bank dad-input"><button type="button" class="action-key bank-key" id="add-button"><span>ADD</span><small>MINUTES</small></button><div class="keypad" aria-label="Enter minutes to adjust"><button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button><button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button><button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button><button data-key="C" class="erase">C</button><button data-key="0">0</button><button data-key="back" class="erase">⌫</button></div><button type="button" class="action-key spend-key" id="remove-button"><span>REMOVE</span><small>MINUTES</small></button></div>
+ </section>
+ <aside class="speaker-section"><div class="speaker-outer"><div class="speaker-grill"></div></div><div class="speaker-label">HQ RADIO / SPEAKER</div><div class="hq-switches"><button id="stop-session" class="hq-button">■ STOP SESSION</button><button id="link-device-open" class="hq-button">⌁ LINK DEVICE</button><button id="dad-signout" class="hq-button">↪ SIGN OUT</button></div></aside>
+</div>
+<div class="cockpit-footer"><span class="engraving" id="dad-status">● AUTHENTICATION REQUIRED</span><div class="session-actions"><span class="tiny-label">MANUAL OVERRIDE ENABLED</span></div><button class="sound-toggle" id="dad-link-footer" type="button">⌁ LINK</button><button class="sound-toggle" id="dad-signout-footer" type="button">↪ OUT</button><button class="sound-toggle clear-bank-control" id="clear-bank" type="button" title="Set saved and session time to zero">⌫ CLEAR BANK</button><button class="sound-toggle" id="dad-lock" type="button">⌑ LOCK HQ</button><button class="sound-toggle" id="sound-toggle">♪ SOUND ON</button></div>
+</section>
+<section class="viewport-frame mission-window" aria-label="Mission tracking screen"><div class="viewport-bolts"><i></i><i></i><i></i><i></i></div><div class="viewport"><div class="space-background"></div><div class="map-vignette"></div><div class="camera-label">MISSION TRACKING RADAR <span class="rec-dot"></span> LIVE BANK STATUS</div>
+ <div class="route-line"><svg viewBox="0 0 920 320" preserveAspectRatio="none"><path d="M95 190 C215 115 260 225 340 166 S475 120 548 175 S685 215 787 117" stroke="#cfb688" stroke-width="3" stroke-dasharray="7 13" fill="none" opacity=".65"/></svg></div>
+ <div class="planet planet-earth"><img src="assets/earth.png" alt=""><span>EARTH</span></div><div class="planet planet-moon"><div class="orb"></div><span>MOON</span></div><div class="planet planet-mars"><div class="orb"></div><span>MARS</span></div><div class="planet planet-jupiter"><div class="orb"></div><span>JUPITER</span></div><div class="planet planet-saturn"><div class="orb"></div><span>SATURN</span></div>
+ <div class="mission-overlay"><div><small id="map-destination-caption">CURRENT DESTINATION</small><strong id="map-destination">MARS</strong></div><div><small id="map-remaining-caption">TIME STILL NEEDED</small><strong id="map-remaining">35 MIN</strong></div><div><small>FLIGHT STATUS</small><strong id="map-flight">CRUISING</strong></div></div><div class="glass-reflection"></div><div class="scanline"></div>
+ </div></section>
+</main><div id="dad-pin-lock" class="pin-backdrop" role="dialog" aria-modal="true" aria-labelledby="dad-pin-title">
+ <section class="pin-console metal"><div class="bolt top-left"></div><div class="bolt top-right"></div><div class="bolt bottom-left"></div><div class="bolt bottom-right"></div>
+ <div class="pin-stencil">AUTHORIZED PERSONNEL • MISSION HQ</div><h1 id="dad-pin-title">DAD CONTROL</h1>
+ <div class="pin-subtitle">SECURITY KEYPAD / ACCESS REQUIRED</div>
+ <div class="pin-readout inset"><span class="digits" id="dad-pin-digits">○○○○</span></div>
+ <div class="pin-keypad keypad" aria-label="Dad PIN keypad"><button data-pin-key="1">1</button><button data-pin-key="2">2</button><button data-pin-key="3">3</button><button data-pin-key="4">4</button><button data-pin-key="5">5</button><button data-pin-key="6">6</button><button data-pin-key="7">7</button><button data-pin-key="8">8</button><button data-pin-key="9">9</button><button data-pin-key="C">C</button><button data-pin-key="0">0</button><button data-pin-key="back">⌫</button></div>
+ <div class="pin-hint" id="dad-pin-hint" aria-live="polite">ENTER YOUR FOUR-DIGIT PIN</div>
+ <div class="pin-warning">CONVENIENCE LOCK • FIREBASE SIGN-IN IS REQUIRED FOR ACCOUNT ACCESS.</div>
+ </section>
+</div><div id="dad-auth-overlay" class="link-overlay" role="dialog" aria-modal="true" aria-label="Dad login">
+ <div class="link-console metal"><h2>DAD CONTROL • SECURE SIGN-IN</h2>
+ <p>Sign in with your existing Firebase parent account.</p>
+ <form id="dad-login-form"><label>EMAIL <input id="dad-email" type="email" autocomplete="username" required></label>
+ <label>PASSWORD <input id="dad-password" type="password" autocomplete="current-password" required></label>
+ <button type="submit">SIGN IN</button></form><p id="dad-auth-message" aria-live="polite">Checking your session…</p></div>
+</div>
+<div id="dad-link-overlay" class="link-overlay" hidden role="dialog" aria-modal="true" aria-label="Link child device">
+ <div class="link-console metal"><h2>LINK ASHER'S DEVICE</h2>
+ <p>Copy the Device ID from Asher's screen and paste it here.</p>
+ <input id="childUidInput" type="text" autocomplete="off" placeholder="Asher's Device ID" aria-label="Device ID">
+ <button id="linkDevice" type="button">LINK DEVICE</button><button id="link-device-close" type="button">CLOSE</button>
+ <p id="linkMessage" aria-live="polite"></p></div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="live-ui.js"></script><script type="module" src="dad-sync.js"></script><script src="tablet-bridge.js"></script></body></html>

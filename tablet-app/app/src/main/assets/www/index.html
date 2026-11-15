@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Asher's Rocket | Time Bank</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="tablet-tablet.css"></head>
+<body data-role="child">
+<div class="sitebar"><span class="connection-tag"><i></i> FIREBASE CONNECTED</span><nav><a class="active" href="index.html">ASHER'S COCKPIT</a><a href="dad.html">DAD CONTROL ↗</a></nav></div>
+<main class="station">
+<section class="cockpit metal" aria-label="Asher's spacecraft control console">
+<div class="bolt top-left"></div><div class="bolt top-right"></div><div class="bolt bottom-left"></div><div class="bolt bottom-right"></div>
+<div class="console-title"><span class="stencil">✦ ASHER'S ROCKET</span><span class="serial">RTB-01 / FLIGHT CONTROL</span></div>
+<div class="console-grid">
+  <section class="instrument-left">
+    <div class="clock-unit inset">
+      <div class="clock-face"><span class="digits" id="bank-clock">01:25:00</span></div><div class="instrument-label">BANKED TIME</div>
+      <div class="clock-face small"><span class="digits" id="session-clock">00:00</span></div><div class="instrument-label">PLAY TIME</div>
+    </div>
+    <div class="gauge-panel inset">
+      <div class="gauge-caption" id="destination-caption">NEXT DESTINATION</div>
+      <svg class="gauge-svg" viewBox="0 0 220 128" aria-label="Progress to next destination"><defs><linearGradient id="gaugeMetal" x2="0" y2="1"><stop stop-color="#f3d9a3"/><stop offset="1" stop-color="#745b43"/></linearGradient></defs><path d="M28 103 A82 82 0 0 1 192 103" fill="none" stroke="#151514" stroke-width="22"/><path d="M28 103 A82 82 0 0 1 192 103" fill="none" stroke="#c1a277" stroke-width="13" stroke-dasharray="7 5"/><path d="M28 103 A82 82 0 0 1 192 103" fill="none" stroke="#703e32" stroke-width="2"/><g id="gauge-needle" transform="rotate(-55 110 103)"><path d="M106 105 L110 27 L114 105Z" fill="#d9543c" stroke="#351711" stroke-width="2"/></g><circle cx="110" cy="103" r="10" fill="url(#gaugeMetal)" stroke="#31251e" stroke-width="3"/></svg>
+      <div class="gauge-bottom"><strong id="destination-name">MARS</strong><span id="destination-remaining">35 MIN TO GO</span></div>
+    </div>
+  </section>
+  <section class="center-console">
+    <div class="lights-row"><div class="indicator"><span class="lamp green lit" id="lamp-ready"></span><span>READY</span></div><div class="indicator"><span class="lamp amber" id="lamp-pending"></span><span>PENDING</span></div><div class="indicator"><span class="lamp red" id="lamp-playing"></span><span>PLAYING</span></div></div>
+    <div class="entry-display inset"><span class="entry-prefix">MIN</span><span class="digits" id="entered-minutes">005</span></div>
+    <div class="input-bank">
+      <button type="button" class="action-key bank-key" id="bank-button"><span>BANK</span><small>REQUEST</small></button>
+      <div class="keypad" aria-label="Enter minutes"><button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button><button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button><button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button><button data-key="C" class="erase">C</button><button data-key="0">0</button><button data-key="back" class="erase">⌫</button></div>
+      <button type="button" class="action-key spend-key" id="spend-button"><span>SPEND</span><small>REQUEST</small></button>
+    </div>
+  </section>
+  <aside class="speaker-section"><div class="speaker-outer"><div class="speaker-grill" aria-label="Vintage round speaker"></div></div><div class="speaker-label">RADIO / SPEAKER</div><div class="keychain" aria-hidden="true">
+  <svg class="keychain-art" viewBox="0 0 54 148" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="charmSteel" x1="0" x2="1"><stop offset="0" stop-color="#4b4741"/><stop offset=".22" stop-color="#d9c5a4"/><stop offset=".54" stop-color="#eee1c9"/><stop offset="1" stop-color="#524c43"/></linearGradient>
+      <linearGradient id="charmRed" x1="0" x2="1"><stop offset="0" stop-color="#4a1d18"/><stop offset=".6" stop-color="#b45741"/><stop offset="1" stop-color="#6a2c23"/></linearGradient>
+    </defs>
+    <circle cx="27" cy="14" r="11" fill="none" stroke="#15120f" stroke-width="6"/>
+    <circle cx="27" cy="14" r="11" fill="none" stroke="url(#charmSteel)" stroke-width="3.8"/>
+    <g fill="none" stroke="#c7b9a3" stroke-width="3.3">
+      <ellipse cx="27" cy="35" rx="5" ry="8"/><ellipse cx="27" cy="47" rx="5" ry="8"/><ellipse cx="27" cy="59" rx="5" ry="8"/>
+    </g>
+    <circle cx="27" cy="69" r="4.2" fill="none" stroke="#b6a68d" stroke-width="2.8"/>
+    <g transform="translate(0 1)">
+      <path d="M27 75 C15 87 17 103 19 121 L35 121 C37 103 39 87 27 75Z" fill="url(#charmSteel)" stroke="#171717" stroke-width="2"/>
+      <path d="M27 75 Q20 83 20 90 L34 90 Q32 81 27 75Z" fill="url(#charmRed)"/>
+      <path d="M20 106 L9 128 L19 123 L24 113 M34 106 L45 128 L35 123 L30 113" fill="url(#charmRed)" stroke="#261b18" stroke-width="2"/>
+      <circle cx="27" cy="99" r="6.5" fill="#202d34" stroke="#9e8e7b" stroke-width="2"/>
+      <circle cx="27" cy="99" r="4" fill="#5793a3"/>
+      <path d="M23 121 L31 121 L30 128 L24 128Z" fill="#302e2a" stroke="#0c0d0d"/>
+      <path d="M24 130 L27 140 L30 130" fill="#c69a56" stroke="#593e2a" stroke-width="1"/>
+      <path d="M22 87 L20 113" stroke="#fff6e0" stroke-width="1.6" opacity=".48"/>
+    </g>
+  </svg>
+</div></aside>
+</div>
+<div class="cockpit-footer"><span class="engraving" id="child-status">● CONNECTING TO DAD…</span><div class="session-actions"><button id="start-session" hidden>▶ START PLAYING</button><button id="pause-session" hidden>Ⅱ PAUSE</button><button id="end-session" hidden>■ END</button></div><button class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">♪ SOUND ON</button></div>
+</section>
+<section class="viewport-frame" aria-label="Live external rocket camera">
+ <div class="viewport-bolts"><i></i><i></i><i></i><i></i></div>
+ <div class="viewport">
+  <div class="space-background"></div><div class="earth-globe" id="earth-globe" aria-hidden="true"></div><div class="moon"></div>
+  <div class="launch-flare" id="launch-flare" aria-hidden="true"></div>
+  <canvas id="trail-canvas"></canvas>
+  <div class="rocket" id="rocket"><svg viewBox="0 0 100 210" xmlns="http://www.w3.org/2000/svg" aria-label="Animated rocket"><defs><linearGradient id="hull" x1="0" x2="1"><stop stop-color="#777f80"/><stop offset=".24" stop-color="#e4e1d4"/><stop offset=".55" stop-color="#f4ebd6"/><stop offset="1" stop-color="#6d7373"/></linearGradient><linearGradient id="fin" x1="0" x2="1"><stop stop-color="#5b1d1a"/><stop offset=".5" stop-color="#bc4b32"/><stop offset="1" stop-color="#e67d4d"/></linearGradient><radialGradient id="window"><stop stop-color="#91c4d0"/><stop offset=".7" stop-color="#28586d"/><stop offset="1" stop-color="#0a2635"/></radialGradient></defs><path d="M37 144 L11 180 L34 173 L47 153 M63 144 L89 180 L66 173 L53 153" fill="url(#fin)" stroke="#40201b" stroke-width="3"/><path d="M50 11 C31 31 26 72 29 154 L71 154 C74 72 69 31 50 11Z" fill="url(#hull)" stroke="#2b3134" stroke-width="3"/><path d="M50 11 C43 19 38 31 35 44 L65 44 C62 31 57 19 50 11Z" fill="#b34a35"/><circle cx="50" cy="78" r="17" fill="#39494d" stroke="#c4b69e" stroke-width="5"/><circle cx="50" cy="78" r="12" fill="url(#window)"/><path d="M35 130 L65 130" stroke="#5c6668" stroke-width="3"/><path d="M38 154 L62 154 L59 168 L41 168Z" fill="#444443" stroke="#a49a86" stroke-width="3"/><path class="flame" d="M43 170 Q35 195 50 209 Q65 195 57 170Z" fill="#f8bc59"/><path class="flame-inner" d="M46 170 Q44 187 50 199 Q56 187 54 170Z" fill="#fff4c2"/></svg></div>
+ 
+  <div class="glass-reflection"></div><div class="scanline"></div><div class="camera-label">EXTERNAL CAMERA 01 <span class="rec-dot"></span> LIVE FEED</div><div class="flight-badge" id="flight-badge">LANDED ON EARTH • READY FOR LIFTOFF</div>
+ </div>
+</section>
+</main><div id="devicePairing" class="link-overlay" hidden>
+ <div class="link-console metal"><h2>LINK ASHER'S DEVICE</h2>
+ <p>Ask Dad to open Dad Control and enter this device ID once.</p>
+ <code id="deviceUid">CONNECTING…</code>
+ <button id="copyDeviceUid" type="button">COPY DEVICE ID</button>
+ <p id="connectionNotice" aria-live="polite">Connecting…</p></div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="live-ui.js?v=17"></script><script type="module" src="kid-sync.js"></script><script src="tablet-bridge.js"></script></body></html>
