@@ -10,7 +10,24 @@ import android.widget.RemoteViews
 import com.cmdalton.rocket.tablet.ui.MainActivity
 
 class RocketWidget : AppWidgetProvider() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == WidgetRefreshScheduler.ACTION_TICK) {
+            refresh(context)
+            return
+        }
+        super.onReceive(context, intent)
+    }
+
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        paint(manager, ids, context)
+    }
+
+    override fun onDisabled(context: Context) {
+        WidgetRefreshScheduler.cancel(context)
+        super.onDisabled(context)
+    }
+
+    private fun paint(manager: AppWidgetManager, ids: IntArray, context: Context) {
         val views = buildViews(context, WidgetState.load(context))
         ids.forEach { manager.updateAppWidget(it, views) }
     }
@@ -41,8 +58,10 @@ class RocketWidget : AppWidgetProvider() {
             val manager = AppWidgetManager.getInstance(context) ?: return
             val ids = manager.getAppWidgetIds(ComponentName(context, RocketWidget::class.java))
             if (ids.isEmpty()) return
-            val views = buildViews(context, WidgetState.load(context))
+            val state = WidgetState.load(context)
+            val views = buildViews(context, state)
             ids.forEach { manager.updateAppWidget(it, views) }
+            WidgetRefreshScheduler.sync(context, state)
         }
     }
 }

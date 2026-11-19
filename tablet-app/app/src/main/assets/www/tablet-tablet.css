@@ -18,3 +18,51 @@ body[data-role="child"] .cockpit-footer .session-actions {
   gap: 10px;
   flex-wrap: wrap;
 }
+
+/*
+ * Galaxy Tab A11+ landscape (1280×800): v17 cockpit keeps a fixed footer/grid; 72px keys
+ * need more room than the default center column. Flex the shell and scroll the console.
+ */
+@media (min-width: 600px) and (max-height: 820px) and (orientation: landscape) {
+  body[data-role="child"] .station {
+    grid-template-rows: minmax(0, 0.54fr) minmax(0, 0.46fr) var(--strip);
+    gap: 5px;
+    padding-bottom: 5px;
+  }
+  body[data-role="child"] .cockpit {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  body[data-role="child"] .console-title {
+    flex-shrink: 0;
+    height: 22px;
+  }
+  body[data-role="child"] .console-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    padding-top: 3px;
+  }
+  body[data-role="child"] .center-console {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+  body[data-role="child"] .input-bank {
+    min-height: 0;
+  }
+  body[data-role="child"] .cockpit-footer {
+    flex-shrink: 0;
+    height: auto;
+    min-height: 26px;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 6px;
+    margin-top: 2px;
+    padding-bottom: 3px;
+  }
+}
