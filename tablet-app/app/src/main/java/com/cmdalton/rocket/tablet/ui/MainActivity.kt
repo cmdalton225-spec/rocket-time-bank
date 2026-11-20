@@ -8,11 +8,13 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewFeature
 import com.cmdalton.rocket.tablet.R
 import com.cmdalton.rocket.tablet.RocketBridge
@@ -23,6 +25,17 @@ import com.cmdalton.rocket.tablet.BuildConfig
  * bundled assets; the shell only adds Clock timer, widget, landing, and big kid buttons.
  */
 class MainActivity : ComponentActivity() {
+    companion object {
+        /**
+         * The bundle is served from an HTTPS origin, not file://. From file:// the WebView gives
+         * the page a null origin and blocks its ES modules (kid-sync.js / dad-sync.js import
+         * ./firebase.js), so Firebase sign-in, linking, requests and approvals never start.
+         * https://developer.android.com/develop/ui/views/layout/webapps/load-local-content
+         */
+        const val ORIGIN = "https://appassets.androidplatform.net"
+        const val START_URL = "$ORIGIN/assets/www/index.html"
+    }
+
     lateinit var webView: WebView
     var landingOpen = false
 
@@ -37,8 +50,9 @@ class MainActivity : ComponentActivity() {
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
+            // Everything is served through WebViewAssetLoader below; no file:// access needed.
+            allowFileAccess = false
+            allowContentAccess = false
             databaseEnabled = true
             mediaPlaybackRequiresUserGesture = false
             if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
@@ -47,7 +61,13 @@ class MainActivity : ComponentActivity() {
         }
         webView.addJavascriptInterface(RocketBridge(this), RocketBridge.NAME)
         webView.webChromeClient = WebChromeClient()
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+                assetLoader.shouldInterceptRequest(request.url)
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val path = request.url.lastPathSegment ?: return false
                 if (path.endsWith(".html")) {
@@ -58,7 +78,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         if (savedInstanceState == null) {
-            webView.loadUrl("file:///android_asset/www/index.html")
+            webView.loadUrl(START_URL)
         }
     }
 
