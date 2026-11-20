@@ -37,6 +37,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true   // MainActivity reads BuildConfig.DEBUG; AGP 9 no longer generates it by default
     }
 
     lint {

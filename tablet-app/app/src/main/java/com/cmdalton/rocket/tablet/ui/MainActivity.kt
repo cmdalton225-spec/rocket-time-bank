@@ -16,6 +16,7 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.cmdalton.rocket.tablet.R
 import com.cmdalton.rocket.tablet.RocketBridge
+import com.cmdalton.rocket.tablet.BuildConfig
 
 /**
  * v17 cockpit + Dad Control in a full-screen WebView. Firebase and all v17 UI/logic stay in the
