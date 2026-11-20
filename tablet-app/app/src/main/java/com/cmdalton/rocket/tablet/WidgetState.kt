@@ -24,11 +24,14 @@ data class WidgetState(
     fun withElapsedSession(nowMillis: Long = System.currentTimeMillis()): WidgetState {
         if (!running || savedAtMillis <= 0L) return this
         val elapsed = ((nowMillis - savedAtMillis) / 1000).toInt().coerceAtLeast(0)
-        val charged = elapsed.coerceAtMost(sessionSeconds.coerceAtLeast(0))
+        // Bounded by BOTH balances, like kid-sync.js: a flight ends when either runs out
+        // (Dad can cut the bank below a prepared session; Kit's review).
+        val charged = minOf(elapsed, sessionSeconds.coerceAtLeast(0), bankSeconds.coerceAtLeast(0))
         val session = (sessionSeconds - charged).coerceAtLeast(0)
         val bank = (bankSeconds - charged).coerceAtLeast(0)
-        if (session == 0) {
-            return copy(bankSeconds = bank, sessionSeconds = 0, running = false, sessionStatus = "idle")
+        if (session == 0 || bank == 0) {
+            return copy(bankSeconds = bank, sessionSeconds = if (bank == 0) 0 else session,
+                running = false, sessionStatus = "idle")
         }
         if (charged == 0) return this
         return copy(bankSeconds = bank, sessionSeconds = session)

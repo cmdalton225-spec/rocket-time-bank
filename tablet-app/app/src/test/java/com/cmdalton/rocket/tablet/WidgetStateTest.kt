@@ -28,6 +28,16 @@ class WidgetStateTest {
         assertEquals("15 min" to "in the bank", RocketWidget.text(s))
     }
 
+    @Test fun flightEndsWhenTheBankRunsOutFirst() {
+        // Kit's example: a 600 s session against a 300 s bank, after five minutes.
+        val s = WidgetState(bankSeconds = 300, sessionSeconds = 600, running = true,
+            sessionStatus = "running", savedAtMillis = t0).withElapsedSession(t0 + 300_000)
+        assertEquals(0, s.bankSeconds)
+        assertFalse(s.running)
+        assertEquals("idle", s.sessionStatus)
+        assertEquals("0 min" to "in the bank", RocketWidget.text(s))
+    }
+
     @Test fun notRunningIsUnchanged() {
         val s = WidgetState(bankSeconds = 600, sessionSeconds = 0, savedAtMillis = t0)
         assertEquals(s, s.withElapsedSession(t0 + 999_000))

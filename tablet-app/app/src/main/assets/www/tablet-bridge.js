@@ -7,6 +7,23 @@
   let wasPlaying = false;
   let lastLandKey = '';
 
+  // One Clock timer per flight, across page loads and app restarts: remember
+  // the projected end time of the timer we set (it stays steady while a flight
+  // runs). A flight whose end is within CLOCK_TOLERANCE_MS of it already has
+  // its timer (Kit's review: Dad Control and back, or reopening the app, must
+  // not start another one).
+  const CLOCK_KEY = 'rocketTablet.clockEndMs';
+  const CLOCK_TOLERANCE_MS = 15000;
+  function clockEnd() {
+    try { return Number(window.localStorage.getItem(CLOCK_KEY)) || 0; } catch (e) { return 0; }
+  }
+  function setClockEnd(ms) {
+    try {
+      if (ms) window.localStorage.setItem(CLOCK_KEY, String(ms));
+      else window.localStorage.removeItem(CLOCK_KEY);
+    } catch (e) { /* storage unavailable: page-local sync still applies */ }
+  }
+
   function parseClockDigits(el) {
     if (!el) return 0;
     const parts = el.textContent.trim().split(':').map((n) => parseInt(n, 10) || 0);
@@ -35,11 +52,18 @@
 
     if (playing) {
       if (!clockSynced && secondsLeft > 0) {
-        android.startClockTimer(secondsLeft);
+        const end = Date.now() + secondsLeft * 1000;
+        if (Math.abs(clockEnd() - end) > CLOCK_TOLERANCE_MS) {
+          android.startClockTimer(secondsLeft);
+          setClockEnd(end);
+        }
         clockSynced = true;
       }
     } else {
+      // Only an OBSERVED stop/pause resets sync — never the request for one
+      // (a refresh during a slow Pause still says running; Kit's review).
       clockSynced = false;
+      if (wasPlaying) setClockEnd(0);
     }
 
     const playDone = session <= 0 && playSecs <= 0;
@@ -66,16 +90,6 @@
     if (hookLive()) clearInterval(t);
   }, 150);
 
-  const sess = setInterval(() => {
-    if (!window.asherFirebaseSession) return;
-    clearInterval(sess);
-    const orig = window.asherFirebaseSession;
-    window.asherFirebaseSession = async function (action) {
-      // Reset BEFORE the transaction: the running snapshot can arrive before
-      // it resolves and start the Clock timer; clearing the flag afterwards
-      // made the next refresh start a second, shorter timer (Kit's review).
-      if (action === 'start' || action === 'pause') clockSynced = false;
-      return orig(action);
-    };
-  }, 150);
+  // (No wrapper around asherFirebaseSession: sync follows the observed running
+  // state above, so neither a fast Start nor a slow Pause can double a timer.)
 })();
