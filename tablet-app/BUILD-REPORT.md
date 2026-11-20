@@ -64,7 +64,7 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
 | # | Requirement | Implementation |
 |---|-------------|----------------|
 | 1 | One-tap play after approve — Matt does nothing after approve | v17 already exposes **▶ START PLAYING** when `sessionStatus` is approved; no extra parent step. Bridge does not add a second play path. |
-| 2 | Rocket countdown = truth; Clock timer same duration | `tablet-bridge.js` hooks `asherLive.setBank` and calls `RocketTablet.startClockTimer(seconds)` on play using session-clock / `sessionSeconds`. `ClockTimer.kt` uses `AlarmClock.ACTION_SET_TIMER` + `EXTRA_SKIP_UI`. Toast if Clock refuses (`R.string.clock_failed`). Resets clock sync flag on pause / new start so resume can set a fresh timer (Android cannot cancel Clock — documented below). |
+| 2 | Rocket countdown = truth; status-bar countdown same duration | **17.2:** `tablet-bridge.js` calls `RocketTablet.syncFlightTimer(min(bank, session))` while a flight runs and `cancelFlightTimer()` on any observed pause / stop / landing. `FlightTimer.kt` owns the timer: an ongoing "Rocket is flying" countdown notification plus an exact time's-up alarm (`FlightTimeUpReceiver`), one per flight end (`FlightTimerPlan`, 3 s tolerance), moved when Dad changes the time. Replaces 17.1's Clock-app timer (`ACTION_SET_TIMER`), which no app can stop: `ACTION_DISMISS_TIMER` only dismisses timers already ringing. |
 | 3 | Big kid buttons ~72dp | `tablet-tablet.css` on child role: `#start-session`, `#pause-session`, `#end-session`, `.action-key`, `.keypad button` min-height 72px. |
 | 4 | Full-screen landing at zero | When play ends with session at 0, bridge calls `showLanding()` → `LandingActivity` (v17 stencil palette). Rocket still lands in WebView. **Judgment #2:** landing title uses stencil wording `LANDED ON EARTH` (not v1.0's plain "The rocket has landed") to stay closer to v17 badge text while still giving a full-screen kid moment per spec. |
 | 5 | Home widget — rocket + banked minutes, tap opens app | `RocketWidget.kt` + copied `widget_rocket.xml`; state from `WidgetState` prefs updated by bridge on every `setBank`. Same Firebase bank as WebView (not a second bank). |
@@ -101,7 +101,7 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
 
 ## Known limits (honest)
 
-- Clock timer cannot be paused/cancelled from the app (Android limitation); rocket + Firestore session remain truth.
+- 17.2: the Clock app is no longer used (Android gives apps no way to stop a running Clock timer); the app's own countdown notification + alarm is cancelled on pause / stop / landing. Needs notifications allowed; a toast says so if they're off.
 - Samsung Clock may ignore `EXTRA_SKIP_UI` and flash its UI — same as v1.0 README.
 - Dad Control in the same app uses parent Google sign-in in WebView (may need Chrome custom tab / account chooser behavior tested on device).
 - ES modules load from `gstatic.com`; WebView must allow network (tested on device still owed).
@@ -124,3 +124,18 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
 2. Install APK on Tab A11+, link child device in Dad Control.
 3. Place widget; run brief checklist: earn → request → approve → Play once → Clock in notification bar → land → widget balance.
 4. Review landing wording and 72dp layout; tweak `strings.xml` / `tablet-tablet.css` only in `tablet-app/` if needed.
+## 17.2 fix round (Nov 20, Matt's live test on the Tab A11+)
+
+- **Countdown skipping / bank draining ~5x (video B):** `www/kid-sync.js` measured play time as the tablet's
+  `Date.now()` minus Firestore's server `lastChargedAt`. The tablet clock runs ~5 s ahead of Google's, so each
+  charge saw 5 s "already elapsed" the moment it landed and charged again on the next 1 s tick: -5 s per second,
+  in Firestore, not just on screen. Fix (tablet copy of kid-sync.js only; `public/` untouched): elapsed time is
+  measured on the server's clock (offset learned from the tablet's own commits), the part of each interval a
+  charge doesn't write rides along to the next one (so every second is charged exactly once), and the
+  countdown re-renders on a 200 ms loop only when a number changes. `live-ui.js`, `dad-sync.js`,
+  `firebase.js`, `styles.css` stay byte-identical to `public/`.
+- **Clock timer never stopped:** see row 2 above.
+- **Tests:** `web-tests/countdown.test.mjs` runs the real kid-sync.js against a fake Firestore with the
+  tablet clock right, 5 s fast/slow and 1 min fast (25 checks; 17.1's file fails them);
+  `web-tests/bridge-timer.test.js` runs the real tablet-bridge.js (10 checks); `FlightTimerPlanTest` (JVM).
+  Run: `node web-tests/countdown.test.mjs && node web-tests/bridge-timer.test.js && ./gradlew testDebugUnitTest`.

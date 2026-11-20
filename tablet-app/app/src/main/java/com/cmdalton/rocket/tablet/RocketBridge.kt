@@ -13,12 +13,18 @@ class RocketBridge(private val host: MainActivity) {
         RocketWidget.refresh(host)
     }
 
+    /** A flight is running: keep one status-bar countdown + time's-up alarm ending in [seconds]. */
     @JavascriptInterface
-    fun startClockTimer(seconds: Long) {
+    fun syncFlightTimer(seconds: Long) {
         host.runOnUiThread {
-            val ok = ClockTimer.start(host, seconds)
-            if (!ok) host.showClockToast()
+            if (!FlightTimer.sync(host, seconds)) host.showTimerToast()
         }
+    }
+
+    /** The flight paused, stopped or landed: cancel the countdown and the alarm. */
+    @JavascriptInterface
+    fun cancelFlightTimer() {
+        host.runOnUiThread { FlightTimer.cancel(host) }
     }
 
     @JavascriptInterface

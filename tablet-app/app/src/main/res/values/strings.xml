@@ -22,7 +22,7 @@
     <string name="clear_confirm_body">Unused minutes go back to the bank.</string>
     <string name="land_now">Land now</string>
     <string name="keep_flying">Keep flying</string>
-    <string name="clock_failed">The Clock timer didn\'t start, but the rocket timer is running.</string>
+    <string name="timer_needs_notifications">Turn on notifications for Asher\'s Rocket so the countdown shows and rings when time is up.</string>
     <string name="landed_title">LANDED ON EARTH</string>
     <string name="landed_subtitle">Play time is zero. The astronaut is home.</string>
     <string name="ok">OK</string>
@@ -67,6 +67,9 @@
 
     <!-- System places -->
     <string name="note_flying">Rocket is flying</string>
+    <string name="note_time_left">Play time left</string>
+    <string name="time_up_title">Rocket time is up!</string>
+    <string name="time_up_body">The rocket has landed. Tap to see it.</string>
     <string name="note_paused">Paused, %1$d min left</string>
     <string name="channel_flight">Rocket flight</string>
     <string name="channel_landing">Rocket landing</string>

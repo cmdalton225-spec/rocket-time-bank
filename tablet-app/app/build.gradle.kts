@@ -11,8 +11,8 @@ android {
         applicationId = "com.cmdalton.rocket.tablet"
         minSdk = 26
         targetSdk = 37
-        versionCode = 17
-        versionName = "17.1-tablet"
+        versionCode = 18
+        versionName = "17.2-tablet"
     }
 
     signingConfigs {

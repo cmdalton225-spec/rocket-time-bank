@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.cmdalton.rocket.tablet.FlightTimer
 
 /** Full-screen landing at zero — v17 rocket animation still runs in the WebView underneath. */
 class LandingActivity : ComponentActivity() {
@@ -21,6 +22,7 @@ class LandingActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             LandingScreen {
+                FlightTimer.silence(this)
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 finish()
             }

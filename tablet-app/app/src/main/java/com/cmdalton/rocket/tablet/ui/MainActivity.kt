@@ -131,7 +131,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun showClockToast() {
-        Toast.makeText(this, getString(R.string.clock_failed), Toast.LENGTH_LONG).show()
+    private var timerToastShown = false
+
+    /** Once per launch: the countdown and time's-up alarm need notifications. */
+    fun showTimerToast() {
+        if (timerToastShown) return
+        timerToastShown = true
+        Toast.makeText(this, getString(R.string.timer_needs_notifications), Toast.LENGTH_LONG).show()
     }
 }
