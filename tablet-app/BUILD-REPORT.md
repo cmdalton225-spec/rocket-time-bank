@@ -136,6 +136,6 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
   `firebase.js`, `styles.css` stay byte-identical to `public/`.
 - **Clock timer never stopped:** see row 2 above.
 - **Tests:** `web-tests/countdown.test.mjs` runs the real kid-sync.js against a fake Firestore with the
-  tablet clock right, 5 s fast/slow and 1 min fast (25 checks; 17.1's file fails them);
+  tablet clock right, 5 s fast/slow and 1 min fast, and reopened 5 min after the last charge (27 checks; 17.1 fails them);
   `web-tests/bridge-timer.test.js` runs the real tablet-bridge.js (10 checks); `FlightTimerPlanTest` (JVM).
   Run: `node web-tests/countdown.test.mjs && node web-tests/bridge-timer.test.js && ./gradlew testDebugUnitTest`.

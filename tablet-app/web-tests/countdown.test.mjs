@@ -9,14 +9,14 @@ import { fileURLToPath } from 'url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FILE = process.argv[2] || path.join(here, '../app/src/main/assets/www/kid-sync.js');
 
-async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956 }) {
+async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956, preElapsed: pre = 2.3 }) {
   let now = 1_800_000_000_000;                       // tablet clock
   const serverClock = () => now - skewMs;             // skewMs > 0: tablet runs fast
   const q = []; let seq = 0;
   const at = (t, fn) => { q.push({ t, fn, s: seq++ }); q.sort((a, b) => a.t - b.t || a.s - b.s); };
   const flush = () => new Promise((r) => setImmediate(r));
   const ts = (ms) => ({ toMillis: () => ms });
-  const preElapsed = mid ? 2.3 : 0;
+  const preElapsed = mid ? pre : 0;
   const doc = { bankSeconds: 3054, sessionSeconds: session, running: mid, sessionStatus: mid ? 'running' : 'approved',
     lastChargedAt: ts(serverClock() - preElapsed * 1000) };
   const listeners = [], SERVER_TS = Symbol('ts');
@@ -69,7 +69,7 @@ async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956
     const steps = changes.slice(1).map((v, i) => v - changes[i]);
     // real time played, on any one clock: since Play was pressed, or since the reopened flight's last charge
     const trueUsed = (now - t0 + (mid ? preElapsed * 1000 : -3000)) / 1000;
-    return { steps, charged: session - doc.sessionSeconds, onScreen: shown.at(-1).session, trueLeft: session - trueUsed, doc };
+    return { steps, charged: session - doc.sessionSeconds, onScreen: shown.at(-1).session, trueLeft: session - trueUsed, played: trueUsed, doc };
   } finally {
     Object.assign(g, { setInterval: saved.setInterval, setTimeout: saved.setTimeout }); Date.now = saved.now;
   }
@@ -77,7 +77,6 @@ async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956
 
 let pass = 0;
 const CHARGE_SLACK = 6;   // charges land every 5 s; up to that much can still be riding in the carry
-const preTol = (mid) => (mid ? 2 : 0);   // a reopened flight had 2.3 s on it already
 const ok = (c, m, extra = '') => { assert.ok(c, `${m} ${extra}`); pass++; console.log('  ok -', m); };
 for (const [skewMs, label] of [[0, 'tablet clock right'], [5000, 'tablet clock 5 s fast (video B)'], [-5000, 'tablet clock 5 s slow'], [60000, 'tablet clock 1 min fast']]) {
   for (const mid of [false, true]) {
@@ -85,8 +84,14 @@ for (const [skewMs, label] of [[0, 'tablet clock right'], [5000, 'tablet clock 5
     const what = `${label}, ${mid ? 'app reopened mid-flight' : 'Play pressed'}`;
     ok(r.steps.every((s) => s === -1), `${what}: countdown ticks one second at a time`, JSON.stringify([...new Set(r.steps)]));
     ok(Math.abs(r.onScreen - r.trueLeft) <= 1.2, `${what}: on-screen time matches real time left`, `${r.onScreen} vs ${r.trueLeft}`);
-    ok(r.charged <= 60 + preTol(mid) && r.charged >= 60 + preTol(mid) - CHARGE_SLACK, `${what}: Firestore charged the real play time`, `charged ${r.charged}`);
+    ok(r.charged <= r.played + 1 && r.charged >= r.played - CHARGE_SLACK, `${what}: Firestore charged the real play time`, `charged ${r.charged} of ${r.played}`);
   }
+}
+for (const skewMs of [0, 5000]) {
+  // Kit's review: the app reopened 5 min after the last charge (Android killed the WebView mid-flight)
+  const r = await simulate({ skewMs, secs: 60, mid: true, preElapsed: 300, rttMs: 400 });
+  ok(r.played > 360 && r.charged >= r.played - CHARGE_SLACK && r.charged <= r.played + 1 && Math.abs(r.onScreen - r.trueLeft) <= 1.2,
+    `reopened 5 min after the last charge (clock ${skewMs / 1000} s off): the whole gap is charged and shown`, `charged ${r.charged} of ${r.played}, ${r.onScreen} vs ${r.trueLeft}`);
 }
 const land = await simulate({ skewMs: 5000, secs: 40, session: 23 });
 ok(land.doc.running === false && land.doc.sessionStatus === 'idle' && land.doc.sessionSeconds === 0 && land.doc.bankSeconds === 3054 - 23,

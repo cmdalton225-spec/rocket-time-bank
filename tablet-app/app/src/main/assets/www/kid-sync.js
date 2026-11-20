@@ -18,7 +18,8 @@ let busy=false,clockBusy=false;
 // bank ~5x real time. clockOffsetMs is learned from our own commits (server time minus local time,
 // lowest round trip wins). carrySec is the play time since the previous charge that the last write
 // didn't cover (whole seconds are written; the remainder and the commit delay ride along), so every
-// second is charged exactly once and the countdown is continuous across charges.
+// second is charged exactly once and the countdown is continuous across charges. It is never capped: after a
+// long gap (Android closed the app mid-flight) the whole gap is still owed; each charge spends at most the balances.
 let clockOffsetMs=0,offsetRttMs=Infinity,carrySec=0,carryAtMs=null,pendingCharge=null,shownKey='',lastChargeTry=0;
 const CHARGE_EVERY=5;
 let requestId=localStorage.getItem('asher_pending_request')||'';
@@ -31,7 +32,7 @@ function elapsed(data){return Math.floor(elapsedExact(data));}
 // The commit happened between sending it and the first sign it landed (our snapshot or the ack, whichever came first).
 function offsetSample(p){const back=Math.min(p.ackAt??Infinity,p.seenAt??Infinity);if(p.sampled||p.atMs==null||back===Infinity)return;p.sampled=true;const rtt=back-p.sentAt;if(rtt>=0&&rtt<offsetRttMs){offsetRttMs=rtt;clockOffsetMs=p.atMs-(p.sentAt+back)/2;}}
 function settleCharge(data){const p=pendingCharge,at=data?.lastChargedAt?.toMillis?.();if(!p||p.settled||at==null||at===p.fromMs)return;p.settled=true;p.seenAt=Date.now();
- if(data.bankSeconds===p.bank&&data.sessionSeconds===p.session&&!!data.running===p.running){p.atMs=at;carryAtMs=at;carrySec=p.running&&!p.start&&p.fromMs!=null?Math.max(-60,Math.min(60,(at-p.fromMs)/1000+p.carryIn-p.spent)):0;offsetSample(p);}
+ if(data.bankSeconds===p.bank&&data.sessionSeconds===p.session&&!!data.running===p.running){p.atMs=at;carryAtMs=at;carrySec=p.running&&!p.start&&p.fromMs!=null?(at-p.fromMs)/1000+p.carryIn-p.spent:0;offsetSample(p);}
  else{carryAtMs=null;carrySec=0;}}
 function effective(data){const spent=Math.min(elapsed(data),Math.max(0,Number(data.bankSeconds)||0),Math.max(0,Number(data.sessionSeconds)||0));return {...data,bankSeconds:Math.max(0,(Number(data.bankSeconds)||0)-spent),sessionSeconds:Math.max(0,(Number(data.sessionSeconds)||0)-spent)};}
 // Re-render only when a shown number changes; the 200 ms loop below makes each second tick on time.
