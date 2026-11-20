@@ -45,7 +45,9 @@ class RocketWidget : AppWidgetProvider() {
             val v = RemoteViews(context.packageName, R.layout.widget_rocket)
             v.setTextViewText(R.id.widget_minutes, big)
             v.setTextViewText(R.id.widget_label, small)
+            // Always Asher's request/play cockpit, even if Dad Control was the last page open.
             val open = Intent(context, MainActivity::class.java)
+                .putExtra(MainActivity.EXTRA_KID_COCKPIT, true)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             val pi = PendingIntent.getActivity(
                 context, 0, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,

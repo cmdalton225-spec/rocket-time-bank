@@ -15,12 +15,23 @@ data class WidgetState(
     fun bankMinutes(): Int = (bankSeconds + 59) / 60
     fun sessionMinutes(): Int = (sessionSeconds + 59) / 60
 
-    /** Extrapolate play time on the widget between bridge updates. */
+    /**
+     * Extrapolate a flight on the widget between bridge updates. Elapsed play time is charged to
+     * BOTH balances (the bank and the session, as the cockpit does), and a flight that has run out
+     * is shown as finished — idle, not "0 min / flying" — so the widget falls back to the
+     * remaining bank (Kit's review).
+     */
     fun withElapsedSession(nowMillis: Long = System.currentTimeMillis()): WidgetState {
-        if (!running || sessionSeconds <= 0 || savedAtMillis <= 0L) return this
+        if (!running || savedAtMillis <= 0L) return this
         val elapsed = ((nowMillis - savedAtMillis) / 1000).toInt().coerceAtLeast(0)
-        if (elapsed == 0) return this
-        return copy(sessionSeconds = (sessionSeconds - elapsed).coerceAtLeast(0))
+        val charged = elapsed.coerceAtMost(sessionSeconds.coerceAtLeast(0))
+        val session = (sessionSeconds - charged).coerceAtLeast(0)
+        val bank = (bankSeconds - charged).coerceAtLeast(0)
+        if (session == 0) {
+            return copy(bankSeconds = bank, sessionSeconds = 0, running = false, sessionStatus = "idle")
+        }
+        if (charged == 0) return this
+        return copy(bankSeconds = bank, sessionSeconds = session)
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.cmdalton.rocket.tablet.ui
 
 import android.Manifest
+import android.content.Intent
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
@@ -34,6 +35,9 @@ class MainActivity : ComponentActivity() {
          */
         const val ORIGIN = "https://appassets.androidplatform.net"
         const val START_URL = "$ORIGIN/assets/www/index.html"
+
+        /** Set by the widget: open (or return to) Asher's cockpit, never Dad Control. */
+        const val EXTRA_KID_COCKPIT = "com.cmdalton.rocket.tablet.KID_COCKPIT"
     }
 
     lateinit var webView: WebView
@@ -78,6 +82,21 @@ class MainActivity : ComponentActivity() {
             }
         }
         if (savedInstanceState == null) {
+            webView.loadUrl(START_URL)
+        }
+        // Widget taps reach an existing (singleTask) activity here, a cold start via getIntent().
+        addOnNewIntentListener { openKidCockpitIfAsked(it) }
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        openKidCockpitIfAsked(intent)          // after any restoreState of a Dad Control page
+    }
+
+    private fun openKidCockpitIfAsked(i: Intent?) {
+        if (i?.getBooleanExtra(EXTRA_KID_COCKPIT, false) != true) return
+        i.removeExtra(EXTRA_KID_COCKPIT)
+        if (webView.url?.substringBefore('?')?.endsWith("/www/index.html") != true) {
             webView.loadUrl(START_URL)
         }
     }

@@ -19,7 +19,10 @@
     const bank = Math.max(0, Number(eff?.bankSeconds ?? raw?.bankSeconds) || 0);
     const session = Math.max(0, Number(eff?.sessionSeconds ?? raw?.sessionSeconds) || 0);
     const playing = !!raw?.running;
-  const payload = JSON.stringify({
+    // A new flight: forget the last landing, so an empty-bank landing
+    // (always "0:0:idle") shows again next time (Kit's review).
+    if (playing && !wasPlaying) lastLandKey = '';
+    const payload = JSON.stringify({
       bankSeconds: bank,
       sessionSeconds: session,
       running: playing,
@@ -68,10 +71,11 @@
     clearInterval(sess);
     const orig = window.asherFirebaseSession;
     window.asherFirebaseSession = async function (action) {
-      const out = await orig(action);
-      if (action === 'start') clockSynced = false;
-      if (action === 'pause') clockSynced = false;
-      return out;
+      // Reset BEFORE the transaction: the running snapshot can arrive before
+      // it resolves and start the Clock timer; clearing the flag afterwards
+      // made the next refresh start a second, shorter timer (Kit's review).
+      if (action === 'start' || action === 'pause') clockSynced = false;
+      return orig(action);
     };
   }, 150);
 })();
