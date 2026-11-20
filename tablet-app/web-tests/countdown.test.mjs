@@ -31,16 +31,20 @@ async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956
       if (ref.kind === 'approved') { at(now + 1, () => cb({ exists: () => true })); return () => {}; }
       const l = (d) => cb({ exists: () => true, data: () => d }); listeners.push(l); at(now + rttMs / 2, () => l({ ...doc })); return () => {};
     },
+    // Optimistic concurrency like Firestore's: a transaction whose read was overtaken by another write
+    // (e.g. the widget's) is re-run from a fresh read instead of overwriting it.
     runTransaction: (db, fn) => new Promise((resolve) => {
-      at(now + rttMs, async () => {
+      const attempt = () => at(now + rttMs, async () => {
         const snapshot = { ...doc }; let pending = null;
         await fn({ get: async () => ({ exists: () => true, data: () => snapshot }), update: (r, u) => { pending = u; } });
         await flush();
         at(now + rttMs / 2, () => {
-          if (pending) { const t = serverClock(); for (const k in pending) doc[k] = pending[k] === SERVER_TS ? ts(t) : pending[k]; doc.__commits = (doc.__commits || 0) + 1; deliver(); }
+          if (pending && (doc.__v || 0) !== (snapshot.__v || 0)) { attempt(); return; }
+          if (pending) { const t = serverClock(); for (const k in pending) doc[k] = pending[k] === SERVER_TS ? ts(t) : pending[k]; doc.__v = (doc.__v || 0) + 1; doc.__commits = (doc.__commits || 0) + 1; deliver(); }
           at(now + rttMs / 2, resolve);
         });
       });
+      attempt();
     }),
   };
   const el = () => ({ textContent: '', hidden: false, addEventListener() {} });
@@ -61,10 +65,11 @@ async function simulate({ skewMs, secs, rttMs = 120, mid = false, session = 1956
     await import(mod);
     const runUntil = async (tEnd) => { while (q.length && q[0].t <= tEnd) { const e = q.shift(); now = e.t; e.fn(); await flush(); await flush(); } now = tEnd; };
     const t0 = now;
+    // External writes (the home-screen widget's REST transaction) land on the server at these times
+    // (seconds after the 3 s mark; negative = during the cockpit's start-up).
+    for (const ev of script) at(t0 + 3000 + ev.at * 1000, () => { const v = JSON.stringify(doc); ev.fn(doc, serverClock(), ts); if (JSON.stringify(doc) !== v) { doc.__v = (doc.__v || 0) + 1; deliver(); } });
     await runUntil(t0 + 3000);
     if (!mid) g.asherFirebaseSession('start');
-    // External writes (the home-screen widget's REST transaction) land on the server at these times.
-    for (const ev of script) at(t0 + 3000 + ev.at * 1000, () => { ev.fn(doc, serverClock(), ts); deliver(); });
     await runUntil(t0 + 3000 + secs * 1000);
     const changes = []; let prev = null;
     for (const s of shown) { if (prev === null || s.session !== prev) changes.push(s.session); prev = s.session; }
@@ -118,6 +123,38 @@ for (const skewMs of [0, 5000]) {
   const flownAfterPlay = 20.4 + (60 - 40);
   ok(Math.abs((1956 - r.onScreen) - flownAfterPlay) <= 1.2 && r.doc.running,
     `after widget Play the cockpit counts on from where the widget resumed (${t})`, `${1956 - r.onScreen} flown vs ${flownAfterPlay}`);
+}
+// Kit's review: a widget Pause right after the cockpit's calibration (it reopened 5 min after the last
+// charge) must still charge the whole gap. The cockpit hands its outstanding carry to the native side
+// (window.asherOutstanding -> tablet-bridge -> RocketTablet.onBankState), keyed to lastChargedAt.
+// The native side's rule (SessionRules.kt Carry.owedFor), fed what the cockpit last published.
+let published = null;
+globalThis.asherOutstandingChanged = () => { published = JSON.parse(JSON.stringify(globalThis.asherOutstanding())); };
+const owedFor = (o, doc) => {
+  const at = doc.lastChargedAt.toMillis();
+  if (!o) return 0;
+  if (o.atMs === at) return o.sec;
+  const p = o.pending;
+  if (p && at > p.fromMs && doc.bankSeconds === p.bank && doc.sessionSeconds === p.session) return (at - p.fromMs) / 1000 + p.carryIn - p.spent;
+  return 0;
+};
+const widgetPauseWithCarry = (doc, now, ts) => {
+  const carry = owedFor(published, doc);
+  const spent = Math.min(Math.floor((now - doc.lastChargedAt.toMillis()) / 1000 + carry), doc.bankSeconds, doc.sessionSeconds);
+  Object.assign(doc, { bankSeconds: doc.bankSeconds - spent, sessionSeconds: doc.sessionSeconds - spent, running: false,
+    sessionStatus: 'paused', lastChargedAt: ts(now), updatedAt: ts(now) });
+};
+for (const skewMs of [0, 5000]) {
+  let calibrated = false;
+  const r = await simulate({ skewMs, secs: 20, mid: true, preElapsed: 300, rttMs: 400, script: [
+    // pause as soon as the calibration (a 0 s charge) has landed, before any real charge
+    ...Array.from({ length: 40 }, (_, i) => ({ at: -2.9 + i * 0.05, fn: (d, n, t) => {
+      if (calibrated || !d.__commits) return; calibrated = true; widgetPauseWithCarry(d, n, t);
+    } })),
+  ] });
+  ok(calibrated && !r.doc.running && 1956 - r.doc.sessionSeconds >= 300,
+    `widget Pause right after a late reopen's calibration still charges the whole gap (clock ${skewMs / 1000} s off)`,
+    `charged ${1956 - r.doc.sessionSeconds}, calibrated ${calibrated}`);
 }
 const land = await simulate({ skewMs: 5000, secs: 40, session: 23 });
 ok(land.doc.running === false && land.doc.sessionStatus === 'idle' && land.doc.sessionSeconds === 0 && land.doc.bankSeconds === 3054 - 23,

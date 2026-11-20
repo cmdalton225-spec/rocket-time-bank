@@ -85,6 +85,25 @@ class WidgetSessionTest {
         assertEquals(2, fs.tokenRequests)
     }
 
+    @Test fun pauseRightAfterTheCockpitsCalibrationChargesTheWholeGap() {
+        // Kit's review: the cockpit reopened 300 s after the last charge; its calibration charge wrote 0 s and
+        // moved lastChargedAt, leaving the gap in its carry. It published that charge before committing it.
+        flying(bank = 3000, session = 1200, sinceChargeMs = 400)            // the calibration landed 0.4 s ago
+        val calibratedAt = fs.doc["lastChargedAt"] as Long
+        val pending = Carry.Pending(fromMs = calibratedAt - 300_000, carryIn = 0.0, spent = 0, bankSeconds = 3000, sessionSeconds = 1200)
+        session().perform(SessionRules.PAUSE, Carry(atMs = null, seconds = 0.0, pending = pending))
+        assertEquals(0, fs.refusedCommits)
+        assertEquals(2700L, fs.doc["bankSeconds"])                         // 300 s gap + 0.4 s since
+        assertEquals(900L, fs.doc["sessionSeconds"])
+    }
+
+    @Test fun aCarryForAnOlderChargeIsIgnored() {
+        flying(bank = 3000, session = 1200, sinceChargeMs = 10_000)
+        session().perform(SessionRules.PAUSE, Carry(atMs = 12345L, seconds = 250.0,
+            pending = Carry.Pending(fromMs = 1L, carryIn = 0.0, spent = 0, bankSeconds = 9999, sessionSeconds = 9999)))
+        assertEquals(2990L, fs.doc["bankSeconds"])                         // only the 10 s actually since the last charge
+    }
+
     @Test fun readShowsTheBankAsTheCockpitDoes() {
         flying(bank = 3000, session = 1200, sinceChargeMs = 61_500)
         val d = session().read()

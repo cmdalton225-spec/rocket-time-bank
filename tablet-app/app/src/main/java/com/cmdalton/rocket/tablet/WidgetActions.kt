@@ -5,7 +5,8 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import kotlin.concurrent.thread
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Pause / Play from the home-screen widget, without opening the app. The widget runs the cockpit's own
@@ -17,6 +18,23 @@ import kotlin.concurrent.thread
 object WidgetActions {
     const val ACTION_PAUSE = "com.cmdalton.rocket.tablet.action.WIDGET_PAUSE"
     const val ACTION_PLAY = "com.cmdalton.rocket.tablet.action.WIDGET_PLAY"
+
+    /** All widget Firestore work runs here, one call at a time, in the order it was asked for. */
+    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "rocket-widget") }
+
+    /**
+     * Bumped by every newer truth: a widget Pause / Play, or a push from the open cockpit. A background read
+     * that started before the latest bump is stale and is dropped, never applied (Kit's review: a delayed
+     * read must not undo a Pause or re-arm / cancel the flight timer).
+     */
+    private val generation = AtomicLong()
+
+    fun noteNewerState() { generation.incrementAndGet() }
+
+    fun currentGeneration(): Long = generation.get()
+
+    /** Should a read that started at generation [startedAt] still be applied? */
+    fun readIsCurrent(startedAt: Long): Boolean = generation.get() == startedAt
 
     /** Where an outcome lands; Android-backed in the app, recorded in tests. */
     interface Port {
@@ -49,10 +67,13 @@ object WidgetActions {
             return
         }
         val sessionAction = if (action == ACTION_PAUSE) SessionRules.PAUSE else SessionRules.START
-        thread(name = "rocket-widget-$sessionAction") {
-            val result = runCatching { FirestoreSession(creds).perform(sessionAction) }
+        noteNewerState()                                   // any read already in flight is now stale
+        val carry = WidgetState.loadCarry(app)
+        worker.execute {
+            val result = runCatching { FirestoreSession(creds).perform(sessionAction, carry) }
             Handler(Looper.getMainLooper()).post {
                 try {
+                    noteNewerState()                       // and so is any read queued behind this action
                     result.onSuccess { o ->
                         applyTo(o, port(app))
                         o.refused?.let { toast(app, it) }
@@ -75,11 +96,14 @@ object WidgetActions {
             pending.finish()
             return
         }
-        thread(name = "rocket-widget-read") {
-            val result = runCatching { FirestoreSession(creds).read() }
+        val startedAt = currentGeneration()
+        val carry = WidgetState.loadCarry(app)
+        worker.execute {
+            val result = if (readIsCurrent(startedAt)) runCatching { FirestoreSession(creds).read(carry) } else null
             Handler(Looper.getMainLooper()).post {
                 try {
-                    result.onSuccess { applyTo(SessionOutcome(it, changed = false), port(app)) }
+                    // Only if nothing newer (a widget action, a cockpit push) happened since this read began.
+                    if (readIsCurrent(startedAt)) result?.onSuccess { applyTo(SessionOutcome(it, changed = false), port(app)) }
                 } finally {
                     pending.finish()
                 }

@@ -61,11 +61,11 @@ class FirestoreSession(
     private val bankName = "$dbPath/timeBank/main"
     private var idToken: String? = null
 
-    fun perform(action: String, attempts: Int = 3): SessionOutcome {
+    fun perform(action: String, carry: Carry? = null, attempts: Int = 3): SessionOutcome {
         var last: Exception? = null
         repeat(attempts) {
             try {
-                return attempt(action)
+                return attempt(action, carry)
             } catch (e: Contention) {
                 last = e
             }
@@ -74,22 +74,22 @@ class FirestoreSession(
     }
 
     /** The bank right now, with a running flight's used time taken off (server clock). */
-    fun read(): BankDoc {
+    fun read(carry: Carry? = null): BankDoc {
         val (doc, serverNow) = get(null)
-        return SessionRules.effective(doc, serverNow())
+        return SessionRules.effective(doc, serverNow(), carry)
     }
 
-    private fun attempt(action: String): SessionOutcome {
+    private fun attempt(action: String, carry: Carry?): SessionOutcome {
         val tx = post("$firestoreBase/$dbPath:beginTransaction", JSONObject()).getString("transaction")
         val (doc, serverNow) = get(tx)
-        return when (val w = SessionRules.decide(action, doc, serverNow())) {
+        return when (val w = SessionRules.decide(action, doc, serverNow(), carry)) {
             SessionWrite.NoChange -> {
                 rollback(tx)
-                SessionOutcome(SessionRules.effective(doc, serverNow()), changed = false)
+                SessionOutcome(SessionRules.effective(doc, serverNow(), carry), changed = false)
             }
             is SessionWrite.Refused -> {
                 rollback(tx)
-                SessionOutcome(SessionRules.effective(doc, serverNow()), changed = false, refused = w.message)
+                SessionOutcome(SessionRules.effective(doc, serverNow(), carry), changed = false, refused = w.message)
             }
             is SessionWrite.Update -> {
                 val fields = JSONObject()

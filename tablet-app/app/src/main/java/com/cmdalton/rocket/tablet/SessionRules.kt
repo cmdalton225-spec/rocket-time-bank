@@ -9,6 +9,28 @@ data class BankDoc(
     val lastChargedAtMs: Long?,
 )
 
+/**
+ * Flown time the open cockpit (kid-sync.js) has not written yet, so a widget Pause still charges it.
+ * [atMs]/[seconds]: the carry left after the charge that set lastChargedAt = [atMs].
+ * [pending]: a charge the cockpit was committing; if it landed (the doc shows its balances and a later
+ * lastChargedAt) what it left owed is worked out exactly as the cockpit's settleCharge() does. After a late
+ * reopen this is the whole gap: the cockpit's calibration charge writes 0 s and advances lastChargedAt.
+ */
+data class Carry(val atMs: Long?, val seconds: Double, val pending: Pending? = null) {
+    data class Pending(val fromMs: Long, val carryIn: Double, val spent: Long, val bankSeconds: Long, val sessionSeconds: Long)
+
+    /** Seconds owed on top of the time since [doc]'s lastChargedAt. */
+    fun owedFor(doc: BankDoc): Double {
+        val at = doc.lastChargedAtMs ?: return 0.0
+        if (atMs == at) return seconds
+        val p = pending ?: return 0.0
+        if (at > p.fromMs && doc.bankSeconds == p.bankSeconds && doc.sessionSeconds == p.sessionSeconds) {
+            return (at - p.fromMs) / 1000.0 + p.carryIn - p.spent
+        }
+        return 0.0
+    }
+}
+
 /** What a session action writes. bank/session null = unchanged (Play only flips the flight on). */
 sealed class SessionWrite {
     object NoChange : SessionWrite()
@@ -26,7 +48,7 @@ object SessionRules {
     const val START = "start"
     const val PAUSE = "pause"
 
-    fun decide(action: String, doc: BankDoc, serverNowMs: Long): SessionWrite {
+    fun decide(action: String, doc: BankDoc, serverNowMs: Long, carry: Carry? = null): SessionWrite {
         val bank = doc.bankSeconds.coerceAtLeast(0)
         val session = doc.sessionSeconds.coerceAtLeast(0)
         val state = doc.sessionStatus.ifEmpty { "idle" }
@@ -39,7 +61,7 @@ object SessionRules {
         }
         require(action == PAUSE) { "unknown action $action" }
         if (!doc.running) return SessionWrite.NoChange
-        val spent = minOf(elapsedSeconds(doc, serverNowMs), bank, session)
+        val spent = minOf(elapsedSeconds(doc, serverNowMs, carry), bank, session)
         val remainingBank = bank - spent
         val remainingSession = session - spent
         val finished = remainingBank <= 0 || remainingSession <= 0
@@ -51,16 +73,17 @@ object SessionRules {
         )
     }
 
-    /** Whole seconds flown since the last charge, on the server's clock. */
-    fun elapsedSeconds(doc: BankDoc, serverNowMs: Long): Long {
+    /** Whole seconds flown since the last charge, on the server's clock, plus the cockpit's unwritten carry. */
+    fun elapsedSeconds(doc: BankDoc, serverNowMs: Long, carry: Carry? = null): Long {
         val at = doc.lastChargedAtMs ?: return 0
         if (!doc.running) return 0
-        return ((serverNowMs - at) / 1000).coerceAtLeast(0)
+        val owed = carry?.owedFor(doc) ?: 0.0
+        return kotlin.math.floor((serverNowMs - at) / 1000.0 + owed).toLong().coerceAtLeast(0)
     }
 
     /** The balances as the cockpit shows them right now (a running flight has used time since its last charge). */
-    fun effective(doc: BankDoc, serverNowMs: Long): BankDoc {
-        val spent = minOf(elapsedSeconds(doc, serverNowMs), doc.bankSeconds.coerceAtLeast(0), doc.sessionSeconds.coerceAtLeast(0))
+    fun effective(doc: BankDoc, serverNowMs: Long, carry: Carry? = null): BankDoc {
+        val spent = minOf(elapsedSeconds(doc, serverNowMs, carry), doc.bankSeconds.coerceAtLeast(0), doc.sessionSeconds.coerceAtLeast(0))
         return doc.copy(bankSeconds = (doc.bankSeconds - spent).coerceAtLeast(0), sessionSeconds = (doc.sessionSeconds - spent).coerceAtLeast(0))
     }
 }

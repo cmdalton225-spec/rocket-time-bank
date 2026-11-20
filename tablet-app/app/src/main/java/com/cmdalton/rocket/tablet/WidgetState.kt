@@ -53,6 +53,7 @@ data class WidgetState(
     companion object {
         private const val PREFS = "rocket_tablet_widget"
         private const val KEY = "state_json"
+        private const val CARRY = "carry_json"
 
         fun load(context: Context): WidgetState = loadRaw(context).withElapsedSession()
 
@@ -76,6 +77,34 @@ data class WidgetState(
             }
             store(context, pushed, WidgetPlan.remainingFromPush(pushed.sessionSeconds.toLong()))
         }
+
+        /** The cockpit's unwritten flown time (see [Carry]), as kid-sync.js published it last. */
+        fun saveCarry(context: Context, json: String) {
+            val c = parseCarry(json) ?: return
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(CARRY, carryJson(c)).apply()
+        }
+
+        fun loadCarry(context: Context): Carry? =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(CARRY, null)?.let { parseCarry(it) }
+
+        fun parseCarry(json: String): Carry? = try {
+            val o = JSONObject(json)
+            val p = o.optJSONObject("pending")
+            Carry(
+                atMs = if (o.isNull("atMs")) null else o.getLong("atMs"),
+                seconds = o.optDouble("sec", 0.0).takeIf { !it.isNaN() } ?: 0.0,
+                pending = p?.let { Carry.Pending(it.getLong("fromMs"), it.optDouble("carryIn", 0.0), it.getLong("spent"), it.getLong("bank"), it.getLong("session")) },
+            )
+        } catch (_: Exception) {
+            null
+        }
+
+        private fun carryJson(c: Carry): String = JSONObject().apply {
+            put("atMs", c.atMs ?: JSONObject.NULL)
+            put("sec", c.seconds)
+            c.pending?.let { put("pending", JSONObject().put("fromMs", it.fromMs).put("carryIn", it.carryIn).put("spent", it.spent)
+                .put("bank", it.bankSeconds).put("session", it.sessionSeconds)) }
+        }.toString()
 
         /**
          * Save [s] (balances as of now) with the flight's precise time left [remainingMs], keeping the countdown

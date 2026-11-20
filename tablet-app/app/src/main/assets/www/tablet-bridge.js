@@ -19,12 +19,13 @@
     // A new flight: forget the last landing, so an empty-bank landing
     // (always "0:0:idle") shows again next time (Kit's review).
     if (playing && !wasPlaying) lastLandKey = '';
-    android.onBankState(JSON.stringify({
+    const state = {
       bankSeconds: bank,
       sessionSeconds: session,
       running: playing,
       sessionStatus: raw?.sessionStatus || 'idle',
-    }));
+    };
+    android.onBankState(JSON.stringify(state));
 
     // Status-bar countdown + time's-up alarm. The native side keeps ONE timer per flight end
     // (reopening the app, Dad Control and back, or re-renders never stack a second one) and
@@ -61,6 +62,15 @@
   const t = setInterval(() => {
     if (hookLive()) clearInterval(t);
   }, 150);
+
+  // Flown time the cockpit hasn't written yet (kid-sync.js), so a widget Pause charges it too. Only the
+  // cockpit knows it; Dad Control leaves the last one in place.
+  if (KID_PAGE && android.onOutstanding) {
+    window.asherOutstandingChanged = () => {
+      const o = window.asherOutstanding?.();
+      if (o) android.onOutstanding(JSON.stringify(o));
+    };
+  }
 
   // Widget Pause / Play: hand the native side this cockpit's own Firebase sign-in (the anonymous,
   // Dad-approved child account), so the widget runs the same session transaction under the same

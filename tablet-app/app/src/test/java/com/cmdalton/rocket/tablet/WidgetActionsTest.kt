@@ -36,6 +36,14 @@ class WidgetActionsTest {
         assertEquals("timer:300", r.calls[1])
     }
 
+    @Test fun aReadOvertakenByAWidgetActionOrACockpitPushIsDropped() {
+        // Kit's review: a background read that started before a Pause must not land after it.
+        val readStartedAt = WidgetActions.currentGeneration()
+        assertEquals(true, WidgetActions.readIsCurrent(readStartedAt))
+        WidgetActions.noteNewerState()                                       // a widget Pause, or a cockpit push
+        assertEquals(false, WidgetActions.readIsCurrent(readStartedAt))
+    }
+
     @Test fun aFlightWhoseTimeIsUsedUpShowsLandedAndCancelsTheTimer() {
         val r = Recorder()
         WidgetActions.applyTo(SessionOutcome(BankDoc(2970, 0, true, "running", 1L), changed = false), r)

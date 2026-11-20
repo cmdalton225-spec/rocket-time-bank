@@ -33,7 +33,7 @@ function elapsed(data){return Math.floor(elapsedExact(data));}
 function offsetSample(p){const back=Math.min(p.ackAt??Infinity,p.seenAt??Infinity);if(p.sampled||p.atMs==null||back===Infinity)return;p.sampled=true;const rtt=back-p.sentAt;if(rtt>=0&&rtt<offsetRttMs){offsetRttMs=rtt;clockOffsetMs=p.atMs-(p.sentAt+back)/2;}}
 function settleCharge(data){const p=pendingCharge,at=data?.lastChargedAt?.toMillis?.();if(!p||p.settled||at==null||at===p.fromMs)return;p.settled=true;p.seenAt=Date.now();
  if(data.bankSeconds===p.bank&&data.sessionSeconds===p.session&&!!data.running===p.running){p.atMs=at;carryAtMs=at;carrySec=p.running&&!p.start&&p.fromMs!=null?(at-p.fromMs)/1000+p.carryIn-p.spent:0;offsetSample(p);}
- else{carryAtMs=null;carrySec=0;}}
+ else{carryAtMs=null;carrySec=0;}outstandingChanged();}
 function effective(data){const spent=Math.min(elapsed(data),Math.max(0,Number(data.bankSeconds)||0),Math.max(0,Number(data.sessionSeconds)||0));return {...data,bankSeconds:Math.max(0,(Number(data.bankSeconds)||0)-spent),sessionSeconds:Math.max(0,(Number(data.sessionSeconds)||0)-spent)};}
 // Re-render only when a shown number changes; the 200 ms loop below makes each second tick on time.
 // A running flight isn't drawn until this tablet's clock offset is known (well under a second after the app opens), so a
@@ -81,12 +81,19 @@ async function updateSession(action){if(!connected()||clockBusy)return;clockBusy
   const spent=data.running?Math.min(action==='charge'&&!offsetKnown()?0:elapsed(data),bank,session):0;
   const remainingBank=bank-spent,remainingSession=session-spent;
   const finished=remainingBank<=0||remainingSession<=0,ending=action==='end'||finished;
-  mine=pendingCharge={start:false,fromMs:data.running?fromMs:null,carryIn,spent,bank:remainingBank,session:ending?0:remainingSession,running:action==='charge'&&!finished,sentAt:Date.now()};
+  mine=pendingCharge={start:false,fromMs:data.running?fromMs:null,carryIn,spent,bank:remainingBank,session:ending?0:remainingSession,running:action==='charge'&&!finished,sentAt:Date.now()};outstandingChanged();
   tx.update(bankRef,{bankSeconds:remainingBank,sessionSeconds:ending?0:remainingSession,running:action==='charge'&&!finished,sessionStatus:ending?'idle':action==='pause'?'paused':'running',lastChargedAt:serverTimestamp(),updatedAt:serverTimestamp()});
  });if(mine){mine.ackAt=Date.now();offsetSample(mine);}if(action!=='charge')status(action==='start'?'Playing!':action==='pause'?'Session paused.':'Session ended.');}
  catch(e){console.error(e);status('Session update failed: '+e.message);}finally{clockBusy=false;}
 }
 window.asherFirebaseSession=updateSession;
+// Flown time not yet written (keyed to the lastChargedAt it follows), for the widget's Pause on the tablet:
+// after a late reopen the calibration charge leaves the whole gap here, and a widget Pause must still charge it.
+window.asherOutstanding=()=>({atMs:carryAtMs,sec:carrySec,pending:pendingCharge&&!pendingCharge.settled&&!pendingCharge.start&&pendingCharge.running&&pendingCharge.fromMs!==null?
+ {fromMs:pendingCharge.fromMs,carryIn:pendingCharge.carryIn,spent:pendingCharge.spent,bank:pendingCharge.bank,session:pendingCharge.session}:null});
+// ...published the moment it changes: a charge about to commit (if it lands, the widget can still work out what it
+// left owed) and a charge that landed (its carry).
+function outstandingChanged(){try{window.asherOutstandingChanged?.()}catch(e){}}
 setInterval(()=>{if(!connected())return;refresh();if(!bankData.running||clockBusy||Date.now()-lastChargeTry<1000)return;
  const e=elapsed(bankData),left=Math.min(Number(bankData.bankSeconds)||0,Number(bankData.sessionSeconds)||0);
  if(!offsetKnown()||e>=CHARGE_EVERY||(e>0&&e>=left)){lastChargeTry=Date.now();updateSession('charge');}},200);

@@ -9,8 +9,15 @@ import com.cmdalton.rocket.tablet.ui.MainActivity
 class RocketBridge(private val host: MainActivity) {
     @JavascriptInterface
     fun onBankState(json: String) {
+        WidgetActions.noteNewerState()                     // the live cockpit outranks any widget read in flight
         WidgetState.save(host, json)
         RocketWidget.refresh(host)
+    }
+
+    /** Flown time the cockpit hasn't written yet (kid-sync.js), so a widget Pause charges it too. */
+    @JavascriptInterface
+    fun onOutstanding(json: String) {
+        WidgetState.saveCarry(host, json)
     }
 
     /** The cockpit's own Firebase sign-in (anonymous, Dad-approved), so the widget can pause / play as the cockpit. */

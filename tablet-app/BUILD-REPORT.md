@@ -166,3 +166,15 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
   follows), `WidgetPlanTest` (9: the format; a Chronometer vs the cockpit every 100 ms over two minutes; keep
   within a second), `WidgetStateTest` (4), `FlightTimerPlanTest` (5). Node: `countdown.test.mjs` (35, including
   widget Pause / Play while the cockpit is open), `bridge-timer.test.js` (14, including the sign-in handover).
+
+### 17.5 (Kit's review of 6825319)
+
+- **Stale widget reads:** all widget Firestore work runs on one queue, in order. A background read is dropped
+  if anything newer happened after it started (a widget Pause / Play, or a push from the open cockpit), so it
+  can't undo a Pause or re-arm / cancel the flight timer.
+- **The cockpit's unwritten carry:** kid-sync.js publishes it the moment it changes
+  (`window.asherOutstandingChanged` → `RocketBridge.onOutstanding`). That covers a charge about to commit
+  (its starting lastChargedAt, carry-in, spent, and the balances it writes) and a charge that landed (its
+  carry). The widget's Pause adds what is still owed (`Carry.owedFor`, the cockpit's settleCharge formula), so
+  a Pause right after a late reopen's 0 s calibration charge still charges the whole gap.
+- Tests: JVM 35, countdown 37, bridge 14.
