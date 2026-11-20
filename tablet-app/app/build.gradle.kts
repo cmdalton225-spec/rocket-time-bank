@@ -11,8 +11,8 @@ android {
         applicationId = "com.cmdalton.rocket.tablet"
         minSdk = 26
         targetSdk = 37
-        versionCode = 19
-        versionName = "17.3-tablet"
+        versionCode = 20
+        versionName = "17.4-tablet"
     }
 
     signingConfigs {
@@ -52,4 +52,5 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.webkit:webkit:1.14.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")   // real org.json for JVM tests (android.jar only has stubs)
 }

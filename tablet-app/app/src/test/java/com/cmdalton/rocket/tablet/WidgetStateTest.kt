@@ -8,13 +8,15 @@ import org.junit.Test
 class WidgetStateTest {
     private val t0 = 1_000_000L
 
+    private fun shown(s: WidgetState) = WidgetPlan.view(s, 0, s.sessionSeconds * 1000L, 0).let { it.clock to it.label }
+
     @Test fun midFlightChargesBothBalances() {
         val s = WidgetState(bankSeconds = 1200, sessionSeconds = 300, running = true,
             sessionStatus = "running", savedAtMillis = t0).withElapsedSession(t0 + 120_000)
         assertEquals(180, s.sessionSeconds)
         assertEquals(1080, s.bankSeconds)
         assertTrue(s.running)
-        assertEquals("3 min" to "flying", RocketWidget.text(s))
+        assertEquals("03:00" to "flying", shown(s))
     }
 
     @Test fun expiredFlightLandsAndShowsTheRemainingBank() {
@@ -25,7 +27,7 @@ class WidgetStateTest {
         assertEquals(900, s.bankSeconds)
         assertFalse(s.running)
         assertEquals("idle", s.sessionStatus)
-        assertEquals("15 min" to "in the bank", RocketWidget.text(s))
+        assertEquals("15:00" to "in the bank", shown(s))
     }
 
     @Test fun flightEndsWhenTheBankRunsOutFirst() {
@@ -35,7 +37,7 @@ class WidgetStateTest {
         assertEquals(0, s.bankSeconds)
         assertFalse(s.running)
         assertEquals("idle", s.sessionStatus)
-        assertEquals("0 min" to "in the bank", RocketWidget.text(s))
+        assertEquals("00:00" to "in the bank", shown(s))
     }
 
     @Test fun notRunningIsUnchanged() {

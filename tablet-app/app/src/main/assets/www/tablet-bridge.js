@@ -61,4 +61,30 @@
   const t = setInterval(() => {
     if (hookLive()) clearInterval(t);
   }, 150);
+
+  // Widget Pause / Play: hand the native side this cockpit's own Firebase sign-in (the anonymous,
+  // Dad-approved child account), so the widget runs the same session transaction under the same
+  // Firestore rules. Same module URLs as kid-sync.js, so this is kid-sync's own Firebase app + auth.
+  // Cockpit only: Dad Control signs in as Dad, and that account never leaves the page.
+  const FIREBASE = 'https://www.gstatic.com/firebasejs/12.4.0/';
+  if (KID_PAGE && android.onFirebaseAuth) {
+    Promise.all([import(FIREBASE + 'firebase-app.js'), import(FIREBASE + 'firebase-auth.js')])
+      .then(([fbApp, fbAuth]) => {
+        const wait = setInterval(() => {
+          let app;
+          try { app = fbApp.getApp('asher-child'); } catch (e) { return; }   // kid-sync.js not up yet
+          clearInterval(wait);
+          fbAuth.onIdTokenChanged(fbAuth.getAuth(app), (user) => {
+            if (!user || !user.isAnonymous || !user.refreshToken) return;
+            android.onFirebaseAuth(JSON.stringify({
+              apiKey: app.options.apiKey,
+              projectId: app.options.projectId,
+              uid: user.uid,
+              refreshToken: user.refreshToken,
+            }));
+          });
+        }, 200);
+      })
+      .catch(() => { /* offline at load: the next cockpit open hands it over */ });
+  }
 })();

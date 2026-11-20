@@ -84,6 +84,7 @@ object FlightTimer {
             .build()
         note.flags = note.flags or Notification.FLAG_INSISTENT   // rings until tapped, OK'd, or a minute passes
         n.notify(NOTE_TIME_UP, note)
+        RocketWidget.refresh(context, slackMs = 2_000)                 // the widget's countdown lands on the dot
     }
 
     private fun schedule(context: Context, endElapsed: Long) {

@@ -13,6 +13,12 @@ class RocketBridge(private val host: MainActivity) {
         RocketWidget.refresh(host)
     }
 
+    /** The cockpit's own Firebase sign-in (anonymous, Dad-approved), so the widget can pause / play as the cockpit. */
+    @JavascriptInterface
+    fun onFirebaseAuth(json: String) {
+        ChildCredentials.store(host.noBackupFilesDir, json)
+    }
+
     /** A flight is running: keep one status-bar countdown + time's-up alarm ending in [seconds]. */
     @JavascriptInterface
     fun syncFlightTimer(seconds: Long) {

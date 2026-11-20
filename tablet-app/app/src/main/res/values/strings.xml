@@ -74,6 +74,8 @@
     <string name="channel_flight">Rocket flight</string>
     <string name="channel_landing">Rocket landing</string>
     <string name="widget_description">Rocket and banked minutes</string>
-    <string name="widget_minutes_placeholder">0 min</string>
+    <string name="widget_clock_placeholder">00:00</string>
+    <string name="widget_needs_app">Open Asher\'s Rocket once so the widget can pause and play.</string>
+    <string name="widget_failed">The rocket didn\'t answer: %1$s</string>
     <string name="widget_label_placeholder">in the bank</string>
 </resources>

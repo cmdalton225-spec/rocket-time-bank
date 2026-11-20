@@ -139,3 +139,30 @@ sha256sum tablet-app/app/build/outputs/apk/debug/app-debug.apk
   tablet clock right, 5 s fast/slow and 1 min fast, and reopened 5 min after the last charge (27 checks; 17.1 fails them);
   `web-tests/bridge-timer.test.js` runs the real tablet-bridge.js (10 checks); `FlightTimerPlanTest` (JVM).
   Run: `node web-tests/countdown.test.mjs && node web-tests/bridge-timer.test.js && ./gradlew testDebugUnitTest`.
+
+## 17.4 widget round (Nov 20): full countdown + Pause / Play on the widget
+
+- **Countdown:** the widget shows the full clock: `MM:SS` under an hour, `H:MM:SS` from an hour. While a flight
+  runs, it is an Android countdown `Chronometer` that ticks every second on its own. It is based so it shows
+  what the cockpit's session clock shows (the cockpit rounds up, the Chronometer down: base = end + 999 ms).
+  A sync from the cockpit moves it only when it is a second or more off (`WidgetPlan.base`), so there's no
+  visible jump. Paused = frozen time left with a Play button; ready to play = the session with Play; idle = the
+  bank in the same format.
+- **Pause / Play:** the round button runs the cockpit's own session transaction (`SessionRules.kt`, a port of
+  `updateSession` in kid-sync.js) on Firestore through its REST API (`FirestoreSession.kt`). That means the
+  same fields, the same `firestore.rules`, and lastChargedAt / updatedAt set to the server's request time.
+  Flown time is measured on the server's clock (the batchGet readTime), never the tablet's. It signs in as the
+  cockpit's own anonymous, Dad-approved child account: the cockpit page hands its Firebase refresh token over
+  (`tablet-bridge.js` → `RocketBridge.onFirebaseAuth`, cockpit page only, never Dad's account), and it's kept in
+  no-backup app storage. After the commit, the widget shows what Firestore holds and the flight timer follows:
+  Pause cancels the countdown notification + time's-up alarm, Play sets them for exactly the time left. An open
+  cockpit sees the change through its own Firestore listener. No widget-only state.
+- **Widget truth with the app closed:** the widget re-reads the bank from Firestore on its update / flight tick
+  (Kit's open widget-refresh thread).
+- **First use:** the cockpit must be opened once on 17.4 so it can hand over the sign-in; until then the
+  button says so.
+- **Tests:** JVM: `WidgetSessionTest` (7; the real REST client against `FakeFirestore`, a local server
+  enforcing a port of firestore.rules, with the tablet clock 5 s fast), `WidgetActionsTest` (4: the timer
+  follows), `WidgetPlanTest` (9: the format; a Chronometer vs the cockpit every 100 ms over two minutes; keep
+  within a second), `WidgetStateTest` (4), `FlightTimerPlanTest` (5). Node: `countdown.test.mjs` (35, including
+  widget Pause / Play while the cockpit is open), `bridge-timer.test.js` (14, including the sign-in handover).
